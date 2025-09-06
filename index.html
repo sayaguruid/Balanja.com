@@ -395,35 +395,39 @@
             checkoutSidebar.classList.add('translate-x-full');
             cartSidebar.classList.remove('translate-x-full');
         });
-        checkoutForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            submitText.classList.add('hidden');
-            submitLoader.classList.remove('hidden');
-            placeOrderButton.disabled = true;
 
-            const orderDetails = {
-                customerName: document.getElementById('customerName').value,
-                customerNumber: document.getElementById('customerNumber').value,
-                customerAddress: document.getElementById('customerAddress').value,
-                paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD', // Default to COD if none is checked
-                items: Object.values(cart)
-            };
-            
-fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec", {
-    method: "POST",
-    body: JSON.stringify({
-        action: "processOrder",
-        data: orderDetails
-    }),
-    headers: {
-        "Content-Type": "application/json"
-    }
-})
-.then(response => response.json())
-.then(orderNumber => onSuccess(orderNumber))
-.catch(error => onFailure(error));
+checkoutForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitText.classList.add('hidden');
+    submitLoader.classList.remove('hidden');
+    placeOrderButton.disabled = true;
 
-        });
+    const orderDetails = {
+        customerName: document.getElementById('customerName').value,
+        customerNumber: document.getElementById('customerNumber').value,
+        customerAddress: document.getElementById('customerAddress').value,
+        paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD',
+        items: Object.values(cart)
+    };
+
+    fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec", {
+        method: "POST",
+        body: JSON.stringify({
+            action: "processOrder",
+            data: orderDetails
+        }),
+        headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+        },
+        redirect: "follow"
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(orderNumber => onSuccess(orderNumber))
+    .catch(error => onFailure(error));
+});
         paymentMethodRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
                 if (e.target.value === "QRIS") {
