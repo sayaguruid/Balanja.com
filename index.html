@@ -386,17 +386,22 @@
         modalClose.addEventListener('click', hideModal);
         
         // INITIALIZATION
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCart();
-            renderCart();
-            google.script.run.withSuccessHandler((response) => {
-                renderProducts(response.products);
-                qrisUrl = response.qrisUrl;
-            }).withFailureHandler((error) => {
-                loadingMessage.innerHTML = `<p class="text-red-600">Gagal memuat produk. Periksa koneksi atau URL Apps Script.</p>`;
-                console.error("Error fetching products:", error);
-            }).getProductsAndQrisUrl();
-        });
+document.addEventListener('DOMContentLoaded', () => {
+    loadCart();
+    renderCart();
+
+    google.script.run
+        .withSuccessHandler((response) => {
+            renderProducts(response.products);
+            qrisUrl = response.qrisUrl;
+        })
+        .withFailureHandler((error) => {
+            loadingMessage.innerHTML = `<p class="text-red-600">Gagal memuat produk. Periksa koneksi atau URL Apps Script.</p>`;
+            console.error("Error fetching products:", error);
+        })
+        .getProductsAndQrisUrl();
+});
     </script>
 </body>
 </html>
+
