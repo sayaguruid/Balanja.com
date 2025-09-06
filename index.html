@@ -143,7 +143,7 @@
     
     <script>
         let products = [];
-        let qrisUrl = ""; // Variabel baru untuk menyimpan URL QRIS
+        let qrisUrl = ""; 
         let cart = {};
         const currencyFormatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
         const productsList = document.getElementById('products-list');
@@ -175,14 +175,24 @@
         const qrisImageCheckout = document.getElementById('qris-image-checkout');
         
         function updateCartItem(product) {
-            if (cart[product.id]) {
-                cart[product.id].quantity++;
+            const productInCart = cart[product.id];
+            if (productInCart) {
+                if (productInCart.quantity < product.stock) {
+                    productInCart.quantity++;
+                } else {
+                    showModal('Stok Habis', `Stok untuk produk "${product.name}" sudah habis.`, false);
+                }
             } else {
-                cart[product.id] = { ...product, quantity: 1 };
+                if (product.stock > 0) {
+                    cart[product.id] = { ...product, quantity: 1 };
+                } else {
+                    showModal('Stok Habis', `Stok untuk produk "${product.name}" saat ini kosong.`, false);
+                }
             }
             renderCart();
             saveCart();
         }
+
         function decrementQuantity(productId) {
             if (cart[productId]) {
                 cart[productId].quantity--;
@@ -193,6 +203,7 @@
             renderCart();
             saveCart();
         }
+
         function renderProducts(productsData) {
             products = productsData;
             productsList.innerHTML = '';
@@ -203,14 +214,18 @@
                 products.forEach(product => {
                     const productCard = document.createElement('div');
                     productCard.className = 'product-card flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100';
+                    const isOutOfStock = product.stock <= 0;
+                    const buttonText = isOutOfStock ? 'Stok Habis' : '+';
+                    const buttonClass = isOutOfStock ? 'bg-red-400 text-white cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+
                     productCard.innerHTML = `
                         ${product.imageLink ? `<img src="${product.imageLink}" alt="${product.name}" class="w-16 h-16 object-cover rounded-lg mr-4">` : ''}
                         <div class="flex-1">
                             <h3 class="font-semibold text-gray-800">${product.name}</h3>
                             <p class="text-lg font-bold text-gray-600">${currencyFormatter.format(product.price)}</p>
                         </div>
-                        <button data-id="${product.id}" class="add-to-cart bg-gray-200 text-gray-700 font-bold w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-300 transition duration-300">
-                            +
+                        <button data-id="${product.id}" class="add-to-cart font-bold w-8 h-8 rounded-full flex items-center justify-center transition duration-300 ${buttonClass}" ${isOutOfStock ? 'disabled' : ''}>
+                            ${buttonText}
                         </button>
                     `;
                     productsList.appendChild(productCard);
@@ -226,16 +241,16 @@
                 });
             });
         }
+
         function renderCart() {
             cartItemsList.innerHTML = '';
             const cartItems = Object.values(cart);
-            const total = Object.values(cart).reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
             if (cartItems.length === 0) {
                 cartPlaceholder.classList.remove('hidden');
                 checkoutButton.disabled = true;
                 cartCountEl.classList.add('hidden');
-                totalPriceButtonEl.textContent = 'Rp 0';
             } else {
                 cartPlaceholder.classList.add('hidden');
                 checkoutButton.disabled = false;
@@ -243,6 +258,9 @@
                 cartItems.forEach(item => {
                     const itemEl = document.createElement('div');
                     itemEl.className = 'cart-item flex items-center justify-between p-3 bg-gray-50 rounded-lg shadow-sm';
+                    const incrementDisabled = item.quantity >= item.stock;
+                    const incrementClass = incrementDisabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200';
+                    
                     itemEl.innerHTML = `
                         <div class="flex-1">
                             <h4 class="font-medium text-gray-800">${item.name}</h4>
@@ -251,66 +269,88 @@
                         <div class="flex items-center space-x-2">
                             <button data-id="${item.id}" class="decrement-quantity text-gray-500 hover:text-gray-700 font-bold p-1 rounded-full hover:bg-gray-200 transition">&ndash;</button>
                             <span class="text-lg font-bold w-6 text-center text-gray-800">${item.quantity}</span>
-                            <button data-id="${item.id}" class="increment-quantity text-gray-500 hover:text-gray-700 font-bold p-1 rounded-full hover:bg-gray-200 transition">+</button>
+                            <button data-id="${item.id}" class="increment-quantity font-bold p-1 rounded-full transition ${incrementClass}" ${incrementDisabled ? 'disabled' : ''}>+</button>
                         </div>
                     `;
                     cartItemsList.appendChild(itemEl);
                 });
-                totalPriceButtonEl.textContent = currencyFormatter.format(total);
             }
-            document.querySelectorAll('.decrement-quantity').forEach(button => button.addEventListener('click', (e) => decrementQuantity(parseInt(e.target.dataset.id))));
-            document.querySelectorAll('.increment-quantity').forEach(button => button.addEventListener('click', (e) => updateCartItem(products.find(p => p.id === parseInt(e.target.dataset.id)))));
             calculateTotal();
             updateCartCount();
+            
+            document.querySelectorAll('.decrement-quantity').forEach(button => button.addEventListener('click', (e) => decrementQuantity(parseInt(e.target.dataset.id))));
+            document.querySelectorAll('.increment-quantity').forEach(button => button.addEventListener('click', (e) => {
+                const productId = parseInt(e.target.dataset.id);
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    updateCartItem(product);
+                }
+            }));
         }
+
         function calculateTotal() {
             const total = Object.values(cart).reduce((sum, item) => sum + (item.price * item.quantity), 0);
             totalPriceEl.textContent = currencyFormatter.format(total);
             totalPriceButtonEl.textContent = currencyFormatter.format(total);
         }
+
         function updateCartCount() {
             const count = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
             cartCountEl.textContent = count;
             if (count > 0) { cartCountEl.classList.remove('hidden'); } else { cartCountEl.classList.add('hidden'); }
         }
+
         function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
         function loadCart() {
-            const savedCart = localStorage.getItem('cart');
-            if (savedCart) { cart = JSON.parse(savedCart); }
+            try {
+                const savedCart = localStorage.getItem('cart');
+                if (savedCart) {
+                    const parsedCart = JSON.parse(savedCart);
+                    // Filter out items that might have been removed or have a different structure
+                    cart = Object.fromEntries(
+                        Object.entries(parsedCart).filter(([id, item]) => 
+                            products.some(p => p.id === parseInt(id) && p.name === item.name)
+                        )
+                    );
+                }
+            } catch (e) {
+                console.error("Failed to load cart from local storage", e);
+                cart = {};
+            }
         }
+        
         function renderOrderSummary() {
             orderItemsList.innerHTML = '';
-            let total = 0;
             const cartItems = Object.values(cart);
-            
             if (cartItems.length === 0) {
                 orderItemsList.innerHTML = `<p class="text-center text-gray-400">Keranjang Anda kosong.</p>`;
                 orderTotalEl.textContent = currencyFormatter.format(0);
                 placeOrderButton.disabled = true;
                 return;
             }
-            cartItems.forEach(item => {
+            
+            const total = cartItems.reduce((sum, item) => {
                 const itemTotal = item.price * item.quantity;
-                total += itemTotal;
                 const li = document.createElement('li');
                 li.className = 'flex justify-between items-center text-gray-600 p-2 rounded-lg bg-white shadow-sm';
                 li.innerHTML = `
                     <span class="font-medium">${item.name} <span class="text-xs text-gray-400">(${item.quantity}x)</span></span>
-                    <span class="font-bold">${currencyFormatter.format(item.price)}</span>
+                    <span class="font-bold">${currencyFormatter.format(item.price * item.quantity)}</span>
                 `;
                 orderItemsList.appendChild(li);
-            });
+                return sum + itemTotal;
+            }, 0);
             orderTotalEl.textContent = currencyFormatter.format(total);
             placeOrderButton.disabled = false;
         }
+
         function showModal(title, message, isSuccess = true, orderNumber = null) {
             modalTitle.textContent = title;
             modalTitle.className = `text-xl font-bold mb-4 ${isSuccess ? 'text-gray-800' : 'text-red-600'}`;
             modalMessage.innerHTML = message;
             
             if (isSuccess && orderNumber) {
-                // Diubah untuk menggunakan location.origin
-                const trackingLink = `${window.location.origin}/StatusPesanan.html?kode=${orderNumber}`;
+                const trackingLink = `StatusPesanan.html?kode=${orderNumber}`;
                 modalLink.href = trackingLink;
                 modalLink.classList.remove('hidden');
             } else {
@@ -318,19 +358,23 @@
             }
             modal.classList.remove('hidden');
         }
+
         function hideModal() { modal.classList.add('hidden'); }
+
         function onSuccess(orderNumber) {
             submitText.classList.remove('hidden');
             submitLoader.classList.add('hidden');
             placeOrderButton.disabled = false;
             const message = `Terima kasih! Pesanan Anda telah berhasil dibuat. Nomor Pesanan: <strong>#${orderNumber}</strong>.`;
             showModal("Pemesanan Berhasil", message, true, orderNumber);
+            
             checkoutForm.reset();
             localStorage.removeItem('cart');
             cart = {};
             renderCart();
             checkoutSidebar.classList.add('translate-x-full');
         }
+
         function onFailure(error) {
             submitText.classList.remove('hidden');
             submitLoader.classList.add('hidden');
@@ -340,12 +384,8 @@
         }
         
         // EVENT LISTENERS
-        cartIconButton.addEventListener('click', () => {
-            cartSidebar.classList.remove('translate-x-full');
-        });
-        closeCartButton.addEventListener('click', () => {
-            cartSidebar.classList.add('translate-x-full');
-        });
+        cartIconButton.addEventListener('click', () => { cartSidebar.classList.remove('translate-x-full'); });
+        closeCartButton.addEventListener('click', () => { cartSidebar.classList.add('translate-x-full'); });
         checkoutButton.addEventListener('click', () => {
             cartSidebar.classList.add('translate-x-full');
             checkoutSidebar.classList.remove('translate-x-full');
@@ -360,18 +400,19 @@
             submitText.classList.add('hidden');
             submitLoader.classList.remove('hidden');
             placeOrderButton.disabled = true;
+
             const orderDetails = {
                 customerName: document.getElementById('customerName').value,
                 customerNumber: document.getElementById('customerNumber').value,
                 customerAddress: document.getElementById('customerAddress').value,
-                paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
-                items: Object.values(cart).map(item => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price
-                }))
+                paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD', // Default to COD if none is checked
+                items: Object.values(cart)
             };
-            google.script.run.withSuccessHandler(onSuccess).withFailureHandler(onFailure).processOrder(orderDetails);
+            
+            google.script.run
+                .withSuccessHandler(onSuccess)
+                .withFailureHandler(onFailure)
+                .processOrder(orderDetails);
         });
         paymentMethodRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
@@ -386,22 +427,21 @@
         modalClose.addEventListener('click', hideModal);
         
         // INITIALIZATION
-document.addEventListener('DOMContentLoaded', () => {
-    loadCart();
-    renderCart();
-
-    google.script.run
-        .withSuccessHandler((response) => {
-            renderProducts(response.products);
-            qrisUrl = response.qrisUrl;
-        })
-        .withFailureHandler((error) => {
-            loadingMessage.innerHTML = `<p class="text-red-600">Gagal memuat produk. Periksa koneksi atau URL Apps Script.</p>`;
-            console.error("Error fetching products:", error);
-        })
-        .getProductsAndQrisUrl();
-});
+        document.addEventListener('DOMContentLoaded', () => {
+            google.script.run
+                .withSuccessHandler((response) => {
+                    products = response.products;
+                    qrisUrl = response.qrisUrl;
+                    loadCart(); // Load cart AFTER products are fetched
+                    renderProducts(products);
+                    renderCart();
+                })
+                .withFailureHandler((error) => {
+                    loadingMessage.innerHTML = `<p class="text-red-600">Gagal memuat produk. Periksa koneksi atau URL Apps Script.</p>`;
+                    console.error("Error fetching products:", error);
+                })
+                .getProductsAndQrisUrl();
+        });
     </script>
 </body>
 </html>
-
