@@ -1,123 +1,155 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Status Pesanan</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    .loader {
-      border: 4px solid #e5e7eb;
-      border-top: 4px solid #4f46e5;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
-    <script src="https://script.google.com/macros/s/AKfycbxIZniGzC9ha_72MlzU-XxdZt_zBEK2RfJxfLqGZXeLKj1ZQ4JI6vPSu42O9_Y9L3GF/exec"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status Pesanan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .loader {
+      border: 4px solid #e5e7eb;
+      border-top: 4px solid #4f46e5;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen items-center justify-center p-4">
-  <div class="max-w-xl w-full bg-white rounded-xl shadow-lg p-6 md:p-8 text-center">
-    <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-2">Status Pesanan</h1>
-    <p class="text-sm text-gray-500 mb-6">Nomor Pesanan: <span id="order-code" class="font-bold text-gray-800"></span></p>
-        <div id="loading-message" class="flex flex-col items-center justify-center text-gray-500 my-10">
-      <div class="loader mb-2"></div>
-      <p>Memuat status...</p>
-    </div>
-        <div id="not-found-message" class="hidden my-10">
-      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 010-5.656L15.5 4.5M10.5 5.5l.5.5m5.5 5.5l.5.5M19 14l-6-6M9.172 16.172L6 19M15 14l-3-3M9 10L6 7"/>
-      </svg>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">Pesanan tidak ditemukan</h3>
-      <p class="mt-1 text-sm text-gray-500">Silakan periksa kembali nomor pesanan Anda.</p>
-    </div>
-        <div id="order-details-container" class="hidden text-left space-y-4">
-      <div class="bg-gray-50 p-6 rounded-xl shadow-inner">
-        <div class="space-y-2">
-          <p class="flex justify-between text-sm"><span class="text-gray-500">Tanggal:</span> <span id="tanggal" class="font-medium text-gray-800"></span></p>
-          <p class="flex justify-between text-sm"><span class="text-gray-500">Nama Pelanggan:</span> <span id="nama" class="font-medium text-gray-800"></span></p>
-          <p class="flex justify-between text-sm"><span class="text-gray-500">Nomor Telepon:</span> <span id="nomor" class="font-medium text-gray-800"></span></p>
-          <p class="flex justify-between text-sm"><span class="text-gray-500">Metode Pembayaran:</span> <span id="pembayaran" class="font-medium text-gray-800"></span></p>
-        </div>
-      </div>
-      <div class="bg-gray-50 p-6 rounded-xl shadow-inner">
-        <p class="text-lg font-bold text-gray-800 mb-2">Ringkasan Pesanan:</p>
-        <p id="produk" class="text-sm text-gray-700 leading-relaxed"></p>
-        <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-          <span class="text-lg font-bold text-gray-800">Total Harga:</span>
-          <span id="total" class="text-2xl font-extrabold text-gray-800"></span>
-        </div>
-      </div>
-      <div class="bg-gray-50 p-6 rounded-xl shadow-inner">
-        <p class="text-lg font-bold text-gray-800 mb-2">Status Pesanan:</p>
-        <p id="status" class="text-center font-bold text-2xl tracking-wide"></p>
-      </div>
-      <div id="qris-container" class="hidden text-center mt-4 p-4 bg-gray-50 rounded-lg">
-        <p class="text-sm text-gray-600 mb-2">Pindai QRIS di bawah ini:</p>
-        <img id="qris-image" src="" alt="QRIS Code" class="mx-auto rounded-lg w-full max-w-[200px] shadow-md">
-      </div>
-    </div>
-  </div>
-  <script>
-    // Ambil kode dari parameter URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const kode = urlParams.get('kode');
 
-    const currencyFormatter = new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    });
-    function showDetails(data) {
-      const loadingEl = document.getElementById('loading-message');
-      const notFoundEl = document.getElementById('not-found-message');
-      const detailsEl = document.getElementById('order-details-container');
-      const qrisEl = document.getElementById('qris-container');
-      if (data) {
-        document.getElementById('order-code').textContent = kode;
-        document.getElementById('tanggal').textContent = data['Tanggal'];
-        document.getElementById('nama').textContent = data['Nama Pelanggan'];
-        document.getElementById('nomor').textContent = data['Nomor Telepon'];
-        document.getElementById('pembayaran').textContent = data['Metode Pembayaran'];
-        document.getElementById('produk').textContent = data['Produk'];
-        document.getElementById('total').textContent = currencyFormatter.format(data['Total Harga']);
-        document.getElementById('status').textContent = data['Status'];
-        
-        if (data['Status'] === 'Baru') {
-            document.getElementById('status').className += ' text-blue-600';
-        } else if (data['Status'] === 'Diproses') {
-            document.getElementById('status').className += ' text-yellow-600';
-        } else if (data['Status'] === 'Terkirim') {
-            document.getElementById('status').className += ' text-green-600';
-        }
-        if (data.QRIS_URL) {
-            document.getElementById('qris-image').src = data.QRIS_URL;
-            qrisEl.classList.remove('hidden');
-        }
-        detailsEl.classList.remove('hidden');
-      } else {
-        notFoundEl.classList.remove('hidden');
-        document.getElementById('order-code').textContent = kode;
-      }
-      loadingEl.classList.add('hidden');
-    }
-    // Panggil GAS saat halaman dimuat
-    document.addEventListener('DOMContentLoaded', () => {
-      if (kode) {
-        google.script.run.withSuccessHandler(showDetails).withFailureHandler(showDetails).getPesananByKodePublic(kode);
-      } else {
-        showDetails(null);
-      }
-    });
-  </script>
+  <div class="max-w-xl w-full bg-white rounded-xl shadow-lg p-6 md:p-8 text-center">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-2">Status Pesanan</h1>
+    <p class="text-sm text-gray-500 mb-6">Nomor Pesanan: <span id="order-code" class="font-bold text-gray-800"></span></p>
+
+    <!-- Loading -->
+    <div id="loading-message" class="flex flex-col items-center justify-center text-gray-500 my-10">
+      <div class="loader mb-2"></div>
+      <p>Memuat status...</p>
+    </div>
+
+    <!-- Not Found -->
+    <div id="not-found-message" class="hidden my-10">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9.172 16.172a4 4 0 010-5.656L15.5 4.5M10.5 5.5l.5.5m5.5 5.5l.5.5M19 14l-6-6M9.172 16.172L6 19M15 14l-3-3M9 10L6 7" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">Pesanan tidak ditemukan</h3>
+      <p class="mt-1 text-sm text-gray-500">Silakan periksa kembali nomor pesanan Anda.</p>
+    </div>
+
+    <!-- Order Details -->
+    <div id="order-details-container" class="hidden text-left space-y-4">
+
+      <!-- Info -->
+      <div class="bg-gray-50 p-6 rounded-xl shadow-inner space-y-2">
+        <p class="flex justify-between text-sm"><span class="text-gray-500">Tanggal:</span> <span id="tanggal" class="font-medium text-gray-800"></span></p>
+        <p class="flex justify-between text-sm"><span class="text-gray-500">Nama Pelanggan:</span> <span id="nama" class="font-medium text-gray-800"></span></p>
+        <p class="flex justify-between text-sm"><span class="text-gray-500">Nomor Telepon:</span> <span id="nomor" class="font-medium text-gray-800"></span></p>
+        <p class="flex justify-between text-sm"><span class="text-gray-500">Metode Pembayaran:</span> <span id="pembayaran" class="font-medium text-gray-800"></span></p>
+      </div>
+
+      <!-- Ringkasan -->
+      <div class="bg-gray-50 p-6 rounded-xl shadow-inner">
+        <p class="text-lg font-bold text-gray-800 mb-2">Ringkasan Pesanan:</p>
+        <p id="produk" class="text-sm text-gray-700 leading-relaxed"></p>
+        <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+          <span class="text-lg font-bold text-gray-800">Total Harga:</span>
+          <span id="total" class="text-2xl font-extrabold text-gray-800"></span>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="bg-gray-50 p-6 rounded-xl shadow-inner">
+        <p class="text-lg font-bold text-gray-800 mb-2">Status Pesanan:</p>
+        <p id="status" class="text-center font-bold text-2xl tracking-wide"></p>
+      </div>
+
+      <!-- QRIS -->
+      <div id="qris-container" class="hidden text-center mt-4 p-4 bg-gray-50 rounded-lg">
+        <p class="text-sm text-gray-600 mb-2">Pindai QRIS di bawah ini:</p>
+        <img id="qris-image" src="" alt="QRIS Code" class="mx-auto rounded-lg w-full max-w-[200px] shadow-md">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const kode = urlParams.get('kode');
+
+    const currencyFormatter = new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    });
+
+    function showDetails(data) {
+      const loadingEl = document.getElementById('loading-message');
+      const notFoundEl = document.getElementById('not-found-message');
+      const detailsEl = document.getElementById('order-details-container');
+      const qrisEl = document.getElementById('qris-container');
+      const statusEl = document.getElementById('status');
+
+      document.getElementById('order-code').textContent = kode;
+
+      if (data && data.Status) {
+        document.getElementById('tanggal').textContent = data['Tanggal'];
+        document.getElementById('nama').textContent = data['Nama Pelanggan'];
+        document.getElementById('nomor').textContent = data['Nomor Telepon'];
+        document.getElementById('pembayaran').textContent = data['Metode Pembayaran'];
+        document.getElementById('produk').textContent = data['Produk'];
+        document.getElementById('total').textContent = currencyFormatter.format(data['Total Harga']);
+        statusEl.textContent = data['Status'];
+
+        // Reset class
+        statusEl.className = 'text-center font-bold text-2xl tracking-wide';
+        const status = data['Status'].trim();
+        if (status === 'Baru') {
+          statusEl.classList.add('text-blue-600');
+        } else if (status === 'Diproses') {
+          statusEl.classList.add('text-yellow-600');
+        } else if (status === 'Terkirim') {
+          statusEl.classList.add('text-green-600');
+        } else {
+          statusEl.classList.add('text-gray-600');
+        }
+
+        if (data.QRIS_URL) {
+          document.getElementById('qris-image').src = data.QRIS_URL;
+          qrisEl.classList.remove('hidden');
+        }
+
+        detailsEl.classList.remove('hidden');
+      } else {
+        notFoundEl.classList.remove('hidden');
+      }
+
+      loadingEl.classList.add('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (kode) {
+        const apiUrl = `https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec?kode=${encodeURIComponent(kode)}`;
+
+        fetch(apiUrl)
+          .then(res => res.json())
+          .then(data => showDetails(data))
+          .catch(err => {
+            console.error('Gagal mengambil data:', err);
+            showDetails(null);
+          });
+      } else {
+        showDetails(null);
+      }
+    });
+  </script>
+
 </body>
 </html>
-
