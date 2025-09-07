@@ -182,7 +182,7 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDjzrb3TIGWlTpOc4e8B3QdMyZjOJfb7T15zJx-f5J95cQalxWpGiU5FHDK82GODiCiA/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec';
 
         // Helper function to show/hide modals
         function toggleModal(modalId, isVisible) {
