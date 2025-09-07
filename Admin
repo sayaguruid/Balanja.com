@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .dataTables_wrapper .dataTables_filter input {
+            @apply border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500;
+        }
+        .dataTables_wrapper .dataTables_length select {
+            @apply border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            @apply px-4 py-2 rounded-lg mx-1 text-gray-700;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            @apply bg-blue-600 text-white shadow-md;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+            @apply bg-gray-200;
+        }
+        .dataTables_wrapper .dataTables_info {
+            @apply text-gray-600;
+        }
+        .loader {
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <!-- Login Form -->
+    <div id="loginPage" class="flex items-center justify-center min-h-screen p-4">
+        <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">Login Admin</h3>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="passwordInput" class="block text-gray-700 font-medium mb-2 text-left">Password</label>
+                    <input type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" id="passwordInput" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Content -->
+    <div id="dashboardPage" class="hidden flex-1 p-4 md:p-8">
+        <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6">
+            <h1 class="text-3xl font-extrabold text-gray-900 text-center mb-6">Admin Dashboard</h1>
+            <div class="border-b border-gray-200 mb-4">
+                <nav class="flex space-x-2" role="tablist">
+                    <button class="flex-1 text-center py-3 px-4 text-gray-600 font-medium rounded-t-lg border-b-2 border-transparent hover:text-gray-800 hover:border-gray-300 focus:outline-none focus:border-blue-500 active:border-blue-500 active:text-blue-600 transition-colors duration-200" id="orders-tab" data-tab="orders" type="button" role="tab" aria-controls="orders" aria-selected="true">Pesanan</button>
+                    <button class="flex-1 text-center py-3 px-4 text-gray-600 font-medium rounded-t-lg border-b-2 border-transparent hover:text-gray-800 hover:border-gray-300 focus:outline-none focus:border-blue-500 active:border-blue-500 active:text-blue-600 transition-colors duration-200" id="products-tab" data-tab="products" type="button" role="tab" aria-controls="products" aria-selected="false">Produk</button>
+                </nav>
+            </div>
+
+            <div id="tab-content" class="tab-content mt-6">
+                <!-- Orders Tab -->
+                <div id="orders-tab-content" class="tab-pane active" role="tabpanel" aria-labelledby="orders-tab">
+                    <div class="bg-gray-50 rounded-xl shadow-inner p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h5 class="text-xl font-bold text-gray-800">Daftar Pesanan</h5>
+                            <button id="refreshOrdersBtn" class="bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Refresh</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table id="ordersTable" class="w-full text-sm text-left text-gray-500">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-200">
+                                    <tr>
+                                        <th scope="col" class="py-3 px-4">Tanggal</th>
+                                        <th scope="col" class="py-3 px-4">No. Pesanan</th>
+                                        <th scope="col" class="py-3 px-4">Pelanggan</th>
+                                        <th scope="col" class="py-3 px-4">Pembayaran</th>
+                                        <th scope="col" class="py-3 px-4">Produk</th>
+                                        <th scope="col" class="py-3 px-4">Status</th>
+                                        <th scope="col" class="py-3 px-4">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Tab -->
+                <div id="products-tab-content" class="tab-pane hidden" role="tabpanel" aria-labelledby="products-tab">
+                    <div class="bg-gray-50 rounded-xl shadow-inner p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h5 class="text-xl font-bold text-gray-800">Daftar Produk</h5>
+                            <button id="addProductBtn" class="bg-green-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Tambah Produk Baru</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table id="productsTable" class="w-full text-sm text-left text-gray-500">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-200">
+                                    <tr>
+                                        <th scope="col" class="py-3 px-4">ID</th>
+                                        <th scope="col" class="py-3 px-4">Nama</th>
+                                        <th scope="col" class="py-3 px-4">Harga</th>
+                                        <th scope="col" class="py-3 px-4">Stok</th>
+                                        <th scope="col" class="py-3 px-4">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="itemsModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl p-6 shadow-lg w-full max-w-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h5 class="text-xl font-bold text-gray-800">Detail Pesanan</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600" data-modal-close="itemsModal">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <ul id="itemsList" class="divide-y divide-gray-200"></ul>
+                    <div class="text-right pt-4 border-t border-gray-200 font-bold text-lg">
+                        Total Keseluruhan: <span id="grandTotal" class="text-blue-600">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="productModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl p-6 shadow-lg w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h5 id="productModalLabel" class="text-xl font-bold text-gray-800">Tambah Produk</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600" data-modal-close="productModal">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <form id="productForm" class="space-y-4">
+                    <input type="hidden" id="productId">
+                    <div>
+                        <label for="productName" class="block text-sm font-medium text-gray-700">Nama Produk</label>
+                        <input type="text" id="productName" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label for="productPrice" class="block text-sm font-medium text-gray-700">Harga</label>
+                        <input type="number" id="productPrice" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label for="productStock" class="block text-sm font-medium text-gray-700">Stok</label>
+                        <input type="number" id="productStock" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label for="productImage" class="block text-sm font-medium text-gray-700">Link Gambar</label>
+                        <input type="url" id="productImage" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <button type="submit" id="saveProductBtn" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-700 transition-colors">Simpan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDjzrb3TIGWlTpOc4e8B3QdMyZjOJfb7T15zJx-f5J95cQalxWpGiU5FHDK82GODiCiA/exec';
+
+        // Helper function to show/hide modals
+        function toggleModal(modalId, isVisible) {
+            const modal = document.getElementById(modalId);
+            if (isVisible) {
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            } else {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+        }
+        document.querySelectorAll('[data-modal-close]').forEach(button => {
+            button.addEventListener('click', () => {
+                toggleModal(button.getAttribute('data-modal-close'), false);
+            });
+        });
+
+        // Function to fetch data from the script
+        async function fetchData(action, tableId, callback) {
+            Swal.fire({
+                title: 'Memuat data...',
+                text: 'Silakan tunggu sebentar...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=${action}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                Swal.close();
+                callback(data, tableId);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                Swal.fire('Error', 'Gagal memuat data. Periksa koneksi atau URL skrip.', 'error');
+            }
+        }
+
+        // Function to render the orders table
+        function renderOrdersTable(data, tableId) {
+            const table = $(`#${tableId}`);
+            if ($.fn.DataTable.isDataTable(table)) {
+                table.DataTable().destroy();
+            }
+            const tableBody = table.find('tbody');
+            tableBody.empty();
+
+            if (data && data.length > 0) {
+                data.forEach(order => {
+                    let statusColor = 'bg-gray-400';
+                    let statusOptions = '';
+                    switch (order.status) {
+                        case 'Menunggu':
+                            statusColor = 'bg-blue-500';
+                            statusOptions = `<option value="Menunggu" selected>Menunggu</option><option value="Diproses">Diproses</option><option value="Dibatalkan">Dibatalkan</option>`;
+                            break;
+                        case 'Diproses':
+                            statusColor = 'bg-yellow-500';
+                            statusOptions = `<option value="Diproses" selected>Diproses</option><option value="Dikirim">Dikirim</option><option value="Dibatalkan">Dibatalkan</option>`;
+                            break;
+                        case 'Dikirim':
+                            statusColor = 'bg-purple-500';
+                            statusOptions = `<option value="Dikirim" selected>Dikirim</option><option value="Selesai">Selesai</option><option value="Dibatalkan">Dibatalkan</option>`;
+                            break;
+                        case 'Selesai':
+                            statusColor = 'bg-green-500';
+                            statusOptions = `<option value="Selesai" selected>Selesai</option>`;
+                            break;
+                        case 'Dibatalkan':
+                            statusColor = 'bg-red-500';
+                            statusOptions = `<option value="Dibatalkan" selected>Dibatalkan</option>`;
+                            break;
+                    }
+                    
+                    const itemsData = JSON.stringify(order.items);
+                    
+                    const row = `
+                        <tr>
+                            <td class="py-3 px-4">${order.tanggalOrder}</td>
+                            <td class="py-3 px-4">${order.orderNumber}</td>
+                            <td class="py-3 px-4">${order.namaPelanggan}</td>
+                            <td class="py-3 px-4">${order.metodePembayaran}</td>
+                            <td class="py-3 px-4">
+                                <button class="bg-gray-300 text-gray-800 font-medium py-1 px-3 rounded-lg hover:bg-gray-400 transition-colors view-items-btn" data-items='${itemsData}'>Lihat</button>
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="text-white text-xs font-semibold px-2 py-1 rounded-full ${statusColor}">${order.status}</span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <select class="px-2 py-1 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 status-changer" data-order-number="${order.orderNumber}">
+                                    ${statusOptions}
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.append(row);
+                });
+            } else {
+                tableBody.append('<tr><td colspan="7" class="text-center py-4">Tidak ada data pesanan.</td></tr>');
+            }
+            table.DataTable({ "pageLength": 10 });
+        }
+
+        // Function to render the products table
+        function renderProductsTable(data, tableId) {
+            const table = $(`#${tableId}`);
+            if ($.fn.DataTable.isDataTable(table)) {
+                table.DataTable().destroy();
+            }
+            const tableBody = table.find('tbody');
+            tableBody.empty();
+
+            if (data && data.length > 0) {
+                data.forEach(product => {
+                    const priceFormatted = new Intl.NumberFormat('id-ID').format(product.price);
+                    const row = `
+                        <tr>
+                            <td class="py-3 px-4">${product.id}</td>
+                            <td class="py-3 px-4">${product.name}</td>
+                            <td class="py-3 px-4">Rp ${priceFormatted}</td>
+                            <td class="py-3 px-4">${product.stock}</td>
+                            <td class="py-3 px-4">
+                                <button class="bg-blue-600 text-white font-medium py-1 px-3 rounded-lg hover:bg-blue-700 transition-colors edit-product-btn" 
+                                    data-id="${product.id}" 
+                                    data-name="${product.name}" 
+                                    data-price="${product.price}" 
+                                    data-stock="${product.stock}" 
+                                    data-image="${product.imageLink || ''}">Edit</button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.append(row);
+                });
+            } else {
+                tableBody.append('<tr><td colspan="5" class="text-center py-4">Tidak ada data produk.</td></tr>');
+            }
+            table.DataTable({ "pageLength": 10 });
+        }
+
+        // Function to update order status
+        async function updateOrderStatus(orderNumber, newStatus) {
+            Swal.fire({
+                title: 'Memperbarui status...',
+                text: 'Sedang memproses permintaan...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=updateStatus&orderNumber=${orderNumber}&newStatus=${newStatus}`
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    Swal.fire('Berhasil!', result.message, 'success');
+                    fetchData('getOrders', 'ordersTable', renderOrdersTable);
+                } else {
+                    Swal.fire('Error', result.message, 'error');
+                }
+            } catch (error) {
+                console.error("Error updating status:", error);
+                Swal.fire('Error', 'Gagal memperbarui status. Silakan coba lagi.', 'error');
+            }
+        }
+
+        // Function to save/update a product
+        async function saveProduct(formData) {
+            Swal.fire({
+                title: 'Menyimpan produk...',
+                text: 'Sedang memproses permintaan...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(formData)
+                });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    Swal.fire('Berhasil!', result.message, 'success');
+                    toggleModal('productModal', false);
+                    fetchData('getProducts', 'productsTable', renderProductsTable);
+                } else {
+                    Swal.fire('Error', result.message, 'error');
+                }
+            } catch (error) {
+                console.error("Error saving product:", error);
+                Swal.fire('Error', 'Gagal menyimpan produk. Silakan coba lagi.', 'error');
+            }
+        }
+
+        // Main logic
+        $(document).ready(function() {
+            // Login Form submission
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault();
+                const password = $('#passwordInput').val().trim();
+                
+                Swal.fire({
+                    title: 'Memeriksa password...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=verifyPassword&password=${encodeURIComponent(password)}`
+                })
+                .then(response => response.json())
+                .then(result => {
+                    Swal.close();
+                    if (result.status === 'success') {
+                        $('#loginPage').hide();
+                        $('#dashboardPage').show();
+                        fetchData('getOrders', 'ordersTable', renderOrdersTable);
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Login Gagal', text: result.message });
+                    }
+                })
+                .catch(error => {
+                    Swal.close();
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan. Silakan coba lagi.' });
+                    console.error("Login failure:", error);
+                });
+            });
+
+            // Handle tab switching
+            document.querySelectorAll('[data-tab]').forEach(tabButton => {
+                tabButton.addEventListener('click', () => {
+                    document.querySelectorAll('[data-tab]').forEach(btn => {
+                        btn.classList.remove('border-blue-500', 'text-blue-600', 'active:border-blue-500', 'active:text-blue-600');
+                        btn.classList.add('border-transparent', 'text-gray-600', 'hover:border-gray-300', 'hover:text-gray-800');
+                    });
+
+                    tabButton.classList.remove('border-transparent', 'text-gray-600', 'hover:border-gray-300', 'hover:text-gray-800');
+                    tabButton.classList.add('border-blue-500', 'text-blue-600', 'active:border-blue-500', 'active:text-blue-600');
+
+                    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
+                    document.getElementById(tabButton.getAttribute('data-tab') + '-tab-content').classList.remove('hidden');
+
+                    if (tabButton.getAttribute('data-tab') === 'products') {
+                        fetchData('getProducts', 'productsTable', renderProductsTable);
+                    } else {
+                        fetchData('getOrders', 'ordersTable', renderOrdersTable);
+                    }
+                });
+            });
+            document.getElementById('orders-tab').click(); // Show default tab
+
+            // Handle "Lihat" button click
+            $(document).on('click', '.view-items-btn', function() {
+                const items = $(this).data('items');
+                const itemsList = document.getElementById('itemsList');
+                itemsList.innerHTML = '';
+                let grandTotal = 0;
+
+                items.forEach(item => {
+                    const total = item.price * item.quantity;
+                    grandTotal += total;
+                    const listItem = document.createElement('li');
+                    listItem.className = 'flex justify-between py-2 text-sm text-gray-700';
+                    listItem.innerHTML = `
+                        <span class="font-medium">${item.name}</span>
+                        <span class="text-right">${item.quantity} x Rp ${new Intl.NumberFormat('id-ID').format(item.price)} = Rp ${new Intl.NumberFormat('id-ID').format(total)}</span>
+                    `;
+                    itemsList.appendChild(listItem);
+                });
+
+                document.getElementById('grandTotal').textContent = `Rp ${new Intl.NumberFormat('id-ID').format(grandTotal)}`;
+                toggleModal('itemsModal', true);
+            });
+
+            // Handle status change
+            $(document).on('change', '.status-changer', function() {
+                const orderNumber = $(this).data('order-number');
+                const newStatus = $(this).val();
+
+                Swal.fire({
+                    title: 'Yakin?',
+                    text: `Apakah Anda yakin ingin mengubah status pesanan ${orderNumber} menjadi "${newStatus}"?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3B82F6',
+                    cancelButtonColor: '#EF4444',
+                    confirmButtonText: 'Ya, Ubah!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        updateOrderStatus(orderNumber, newStatus);
+                    } else {
+                        fetchData('getOrders', 'ordersTable', renderOrdersTable);
+                    }
+                });
+            });
+
+            // Handle "Tambah Produk Baru" button click
+            $('#addProductBtn').on('click', function() {
+                $('#productForm').trigger('reset');
+                $('#productId').val('');
+                $('#productModalLabel').text('Tambah Produk Baru');
+                toggleModal('productModal', true);
+            });
+
+            // Handle "Edit" button click
+            $(document).on('click', '.edit-product-btn', function() {
+                const productData = $(this).data();
+                $('#productId').val(productData.id);
+                $('#productName').val(productData.name);
+                $('#productPrice').val(productData.price);
+                $('#productStock').val(productData.stock);
+                $('#productImage').val(productData.image);
+                $('#productModalLabel').text(`Edit Produk: ${productData.name}`);
+                toggleModal('productModal', true);
+            });
+
+            // Handle form submission for Add/Edit Product
+            $('#productForm').on('submit', function(e) {
+                e.preventDefault();
+                const formData = {
+                    action: $('#productId').val() ? 'editProduct' : 'addProduct',
+                    id: $('#productId').val(),
+                    name: $('#productName').val(),
+                    price: $('#productPrice').val(),
+                    stock: $('#productStock').val(),
+                    imageLink: $('#productImage').val()
+                };
+                saveProduct(formData);
+            });
+            
+            // Handle refresh button
+            $('#refreshOrdersBtn').on('click', function() {
+                 fetchData('getOrders', 'ordersTable', renderOrdersTable);
+            });
+        });
+    </script>
+</body>
+</html>
