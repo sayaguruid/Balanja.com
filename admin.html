@@ -1,530 +1,863 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <base target="_top">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <title>Halaman Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .dataTables_wrapper .dataTables_filter input {
-            @apply border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
         }
-        .dataTables_wrapper .dataTables_length select {
-            @apply border border-gray-300 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500;
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: #1a237e;
+            color: #fff;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
         }
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            @apply px-4 py-2 rounded-lg mx-1 text-gray-700;
+
+        .sidebar-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #3f51b5;
         }
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-            @apply bg-blue-600 text-white shadow-md;
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 24px;
         }
-        .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
-            @apply bg-gray-200;
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
         }
-        .dataTables_wrapper .dataTables_info {
-            @apply text-gray-600;
+
+        .sidebar-nav-item a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+            font-size: 16px;
         }
-        .loader {
-            border: 4px solid #e5e7eb;
-            border-top: 4px solid #4f46e5;
+
+        .sidebar-nav-item a:hover {
+            background-color: #3f51b5;
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav-item a.active {
+            background-color: #3f51b5;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar-nav-item i {
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .data-table th {
+            background-color: #e8eaf6;
+            color: #1a237e;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .data-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 2px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #1a73e8;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: #1565c0;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: #d9534f;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background-color: #c9302c;
+            transform: translateY(-1px);
+        }
+        
+        .btn-warning {
+            background-color: #f0ad4e;
+            color: #fff;
+        }
+        
+        .btn-warning:hover {
+            background-color: #ec971f;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: #5cb85c;
+            color: #fff;
+        }
+        
+        .btn-success:hover {
+            background-color: #4cae4c;
+            transform: translateY(-1px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        
+        #previewImage {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            display: block;
+        }
+
+        #orderItemsList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #orderItemsList li {
+            background-color: #eef;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .status-badge.Menunggu { background-color: #f0ad4e; }
+        .status-badge.Diproses { background-color: #5bc0de; }
+        .status-badge.Selesai { background-color: #5cb85c; }
+        .status-badge.Dibatalkan { background-color: #d9534f; }
+        
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-size: 20px;
+            color: #1a237e;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+            border-left-color: #1a237e;
+            animation: spin 1s ease infinite;
+            margin-bottom: 10px;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+        /* Dashboard Stats */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .stat-card .stat-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #1a73e8;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1a237e;
+            margin: 0;
+        }
+        
+        .stat-card .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
     </style>
 </head>
-<body class="bg-gray-100 flex flex-col min-h-screen">
-    <!-- Login Form -->
-    <div id="loginPage" class="flex items-center justify-center min-h-screen p-4">
-        <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
-            <h3 class="text-2xl font-bold text-gray-900 mb-6">Login Admin</h3>
-            <form id="loginForm">
-                <div class="mb-4">
-                    <label for="passwordInput" class="block text-gray-700 font-medium mb-2 text-left">Password</label>
-                    <input type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" id="passwordInput" required>
+<body>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Memuat...</p>
+    </div>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin Panel</h2>
+        </div>
+        <nav>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="#" class="active" onclick="showSection('dashboard', this)">
+                        <i class="fas fa-chart-line"></i> Dashboard
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" onclick="showSection('kelola-pesanan', this)">
+                        <i class="fas fa-receipt"></i> Kelola Pesanan
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" onclick="showSection('kelola-produk', this)">
+                        <i class="fas fa-box-open"></i> Kelola Produk
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <div class="main-content">
+        <header>
+            <h1 id="pageTitle">Dashboard</h1>
+        </header>
+
+        <section id="dashboard" class="content-section active">
+            <h2>Rincian Pesanan</h2>
+            <div class="dashboard-stats" id="dashboardStats">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">Login</button>
+            <h3>Pesanan Terbaru</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Nomor Pesanan</th>
+                        <th>Nama Pelanggan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="latestOrdersTableBody">
+                    </tbody>
+            </table>
+        </section>
+
+        <section id="kelola-pesanan" class="content-section">
+            <h2>Kelola Pesanan</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Nomor Pesanan</th>
+                        <th>Nama Pelanggan</th>
+                        <th>Produk</th>
+                        <th>Metode Pembayaran</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="orderTableBody">
+                    </tbody>
+            </table>
+        </section>
+
+        <section id="kelola-produk" class="content-section">
+            <h2>Kelola Produk</h2>
+            <button class="btn btn-primary" onclick="openProductModal()">+ Tambah Produk</button>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Gambar</th>
+                        <th>Nama</th>
+                        <th>Harga</th>
+                        <th>Stok</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    </tbody>
+            </table>
+        </section>
+    </div>
+
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('productModal')">&times;</span>
+            <h3 id="modalTitle">Tambah Produk Baru</h3>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label for="productName">Nama Produk:</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Harga:</label>
+                    <input type="number" id="productPrice" required>
+                </div>
+                <div class="form-group">
+                    <label for="productStock">Stok:</label>
+                    <input type="number" id="productStock" required>
+                </div>
+                <div class="form-group">
+                    <label for="productImage">Gambar Produk:</label>
+                    <input type="file" id="productImage" accept="image/*" onchange="previewFile()">
+                    <img id="previewImage" src="" alt="Pratinjau Gambar">
+                </div>
+                <div class="form-group">
+                    <label for="productImageUrl">URL Gambar (Opsional):</label>
+                    <input type="text" id="productImageUrl" placeholder="Tempel URL gambar di sini jika tidak mengunggah">
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan Produk</button>
             </form>
         </div>
     </div>
-
-    <!-- Admin Dashboard Content -->
-    <div id="dashboardPage" class="hidden flex-1 p-4 md:p-8">
-        <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6">
-            <h1 class="text-3xl font-extrabold text-gray-900 text-center mb-6">Admin Dashboard</h1>
-            <div class="border-b border-gray-200 mb-4">
-                <nav class="flex space-x-2" role="tablist">
-                    <button class="flex-1 text-center py-3 px-4 text-gray-600 font-medium rounded-t-lg border-b-2 border-transparent hover:text-gray-800 hover:border-gray-300 focus:outline-none focus:border-blue-500 active:border-blue-500 active:text-blue-600 transition-colors duration-200" id="orders-tab" data-tab="orders" type="button" role="tab" aria-controls="orders" aria-selected="true">Pesanan</button>
-                    <button class="flex-1 text-center py-3 px-4 text-gray-600 font-medium rounded-t-lg border-b-2 border-transparent hover:text-gray-800 hover:border-gray-300 focus:outline-none focus:border-blue-500 active:border-blue-500 active:text-blue-600 transition-colors duration-200" id="products-tab" data-tab="products" type="button" role="tab" aria-controls="products" aria-selected="false">Produk</button>
-                </nav>
-            </div>
-
-            <div id="tab-content" class="tab-content mt-6">
-                <!-- Orders Tab -->
-                <div id="orders-tab-content" class="tab-pane active" role="tabpanel" aria-labelledby="orders-tab">
-                    <div class="bg-gray-50 rounded-xl shadow-inner p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h5 class="text-xl font-bold text-gray-800">Daftar Pesanan</h5>
-                            <button id="refreshOrdersBtn" class="bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Refresh</button>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table id="ordersTable" class="w-full text-sm text-left text-gray-500">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-200">
-                                    <tr>
-                                        <th scope="col" class="py-3 px-4">Tanggal</th>
-                                        <th scope="col" class="py-3 px-4">No. Pesanan</th>
-                                        <th scope="col" class="py-3 px-4">Pelanggan</th>
-                                        <th scope="col" class="py-3 px-4">Pembayaran</th>
-                                        <th scope="col" class="py-3 px-4">Produk</th>
-                                        <th scope="col" class="py-3 px-4">Status</th>
-                                        <th scope="col" class="py-3 px-4">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Products Tab -->
-                <div id="products-tab-content" class="tab-pane hidden" role="tabpanel" aria-labelledby="products-tab">
-                    <div class="bg-gray-50 rounded-xl shadow-inner p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h5 class="text-xl font-bold text-gray-800">Daftar Produk</h5>
-                            <button id="addProductBtn" class="bg-green-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">Tambah Produk Baru</button>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table id="productsTable" class="w-full text-sm text-left text-gray-500">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-200">
-                                    <tr>
-                                        <th scope="col" class="py-3 px-4">ID</th>
-                                        <th scope="col" class="py-3 px-4">Nama</th>
-                                        <th scope="col" class="py-3 px-4">Harga</th>
-                                        <th scope="col" class="py-3 px-4">Stok</th>
-                                        <th scope="col" class="py-3 px-4">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modals -->
-    <div id="itemsModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-xl p-6 shadow-lg w-full max-w-2xl">
-                <div class="flex justify-between items-center mb-4">
-                    <h5 class="text-xl font-bold text-gray-800">Detail Pesanan</h5>
-                    <button type="button" class="text-gray-400 hover:text-gray-600" data-modal-close="itemsModal">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-                <div class="space-y-4">
-                    <ul id="itemsList" class="divide-y divide-gray-200"></ul>
-                    <div class="text-right pt-4 border-t border-gray-200 font-bold text-lg">
-                        Total Keseluruhan: <span id="grandTotal" class="text-blue-600">Rp 0</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="productModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-xl p-6 shadow-lg w-full max-w-md">
-                <div class="flex justify-between items-center mb-4">
-                    <h5 id="productModalLabel" class="text-xl font-bold text-gray-800">Tambah Produk</h5>
-                    <button type="button" class="text-gray-400 hover:text-gray-600" data-modal-close="productModal">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-                <form id="productForm" class="space-y-4">
-                    <input type="hidden" id="productId">
-                    <div>
-                        <label for="productName" class="block text-sm font-medium text-gray-700">Nama Produk</label>
-                        <input type="text" id="productName" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-                    </div>
-                    <div>
-                        <label for="productPrice" class="block text-sm font-medium text-gray-700">Harga</label>
-                        <input type="number" id="productPrice" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-                    </div>
-                    <div>
-                        <label for="productStock" class="block text-sm font-medium text-gray-700">Stok</label>
-                        <input type="number" id="productStock" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-                    </div>
-                    <div>
-                        <label for="productImage" class="block text-sm font-medium text-gray-700">Link Gambar</label>
-                        <input type="url" id="productImage" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <button type="submit" id="saveProductBtn" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-700 transition-colors">Simpan</button>
-                </form>
-            </div>
-        </div>
-    </div>
     
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('orderDetailsModal')">&times;</span>
+            <h3>Detail Pesanan</h3>
+            <div id="orderDetailsContent">
+                <p><strong>Nomor Pesanan:</strong> <span id="orderNumberDetails"></span></p>
+                <p><strong>Tanggal:</strong> <span id="orderDateDetails"></span></p>
+                <p><strong>Nama Pelanggan:</strong> <span id="customerNameDetails"></span></p>
+                <p><strong>Nomor Telepon:</strong> <span id="customerNumberDetails"></span></p>
+                <p><strong>Alamat:</strong> <span id="customerAddressDetails"></span></p>
+                <p><strong>Metode Pembayaran:</strong> <span id="paymentMethodDetails"></span></p>
+                <p><strong>Status:</strong> <span id="statusDetails"></span></p>
+                <h4>Produk yang Dipesan:</h4>
+                <ul id="orderItemsList"></ul>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec';
+        // Ganti URL ini dengan URL Web App Google Apps Script kamu
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec";
 
-        // Helper function to show/hide modals
-        function toggleModal(modalId, isVisible) {
-            const modal = document.getElementById(modalId);
-            if (isVisible) {
-                modal.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-            } else {
-                modal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
-        }
-        document.querySelectorAll('[data-modal-close]').forEach(button => {
-            button.addEventListener('click', () => {
-                toggleModal(button.getAttribute('data-modal-close'), false);
-            });
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchDashboardData();
         });
 
-        // Function to fetch data from the script
-        async function fetchData(action, tableId, callback) {
-            Swal.fire({
-                title: 'Memuat data...',
-                text: 'Silakan tunggu sebentar...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=${action}`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                Swal.close();
-                callback(data, tableId);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                Swal.fire('Error', 'Gagal memuat data. Periksa koneksi atau URL skrip.', 'error');
-            }
-        }
+        // --- Navigasi Sidebar ---
+        function showSection(sectionId, element) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
 
-        // Function to render the orders table
-        function renderOrdersTable(data, tableId) {
-            const table = $(`#${tableId}`);
-            if ($.fn.DataTable.isDataTable(table)) {
-                table.DataTable().destroy();
-            }
-            const tableBody = table.find('tbody');
-            tableBody.empty();
-
-            if (data && data.length > 0) {
-                data.forEach(order => {
-                    let statusColor = 'bg-gray-400';
-                    let statusOptions = '';
-                    switch (order.status) {
-                        case 'Menunggu':
-                            statusColor = 'bg-blue-500';
-                            statusOptions = `<option value="Menunggu" selected>Menunggu</option><option value="Diproses">Diproses</option><option value="Dibatalkan">Dibatalkan</option>`;
-                            break;
-                        case 'Diproses':
-                            statusColor = 'bg-yellow-500';
-                            statusOptions = `<option value="Diproses" selected>Diproses</option><option value="Dikirim">Dikirim</option><option value="Dibatalkan">Dibatalkan</option>`;
-                            break;
-                        case 'Dikirim':
-                            statusColor = 'bg-purple-500';
-                            statusOptions = `<option value="Dikirim" selected>Dikirim</option><option value="Selesai">Selesai</option><option value="Dibatalkan">Dibatalkan</option>`;
-                            break;
-                        case 'Selesai':
-                            statusColor = 'bg-green-500';
-                            statusOptions = `<option value="Selesai" selected>Selesai</option>`;
-                            break;
-                        case 'Dibatalkan':
-                            statusColor = 'bg-red-500';
-                            statusOptions = `<option value="Dibatalkan" selected>Dibatalkan</option>`;
-                            break;
-                    }
-                    
-                    const itemsData = JSON.stringify(order.items);
-                    
-                    const row = `
-                        <tr>
-                            <td class="py-3 px-4">${order.tanggalOrder}</td>
-                            <td class="py-3 px-4">${order.orderNumber}</td>
-                            <td class="py-3 px-4">${order.namaPelanggan}</td>
-                            <td class="py-3 px-4">${order.metodePembayaran}</td>
-                            <td class="py-3 px-4">
-                                <button class="bg-gray-300 text-gray-800 font-medium py-1 px-3 rounded-lg hover:bg-gray-400 transition-colors view-items-btn" data-items='${itemsData}'>Lihat</button>
-                            </td>
-                            <td class="py-3 px-4">
-                                <span class="text-white text-xs font-semibold px-2 py-1 rounded-full ${statusColor}">${order.status}</span>
-                            </td>
-                            <td class="py-3 px-4">
-                                <select class="px-2 py-1 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 status-changer" data-order-number="${order.orderNumber}">
-                                    ${statusOptions}
-                                </select>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.append(row);
-                });
-            } else {
-                tableBody.append('<tr><td colspan="7" class="text-center py-4">Tidak ada data pesanan.</td></tr>');
-            }
-            table.DataTable({ "pageLength": 10 });
-        }
-
-        // Function to render the products table
-        function renderProductsTable(data, tableId) {
-            const table = $(`#${tableId}`);
-            if ($.fn.DataTable.isDataTable(table)) {
-                table.DataTable().destroy();
-            }
-            const tableBody = table.find('tbody');
-            tableBody.empty();
-
-            if (data && data.length > 0) {
-                data.forEach(product => {
-                    const priceFormatted = new Intl.NumberFormat('id-ID').format(product.price);
-                    const row = `
-                        <tr>
-                            <td class="py-3 px-4">${product.id}</td>
-                            <td class="py-3 px-4">${product.name}</td>
-                            <td class="py-3 px-4">Rp ${priceFormatted}</td>
-                            <td class="py-3 px-4">${product.stock}</td>
-                            <td class="py-3 px-4">
-                                <button class="bg-blue-600 text-white font-medium py-1 px-3 rounded-lg hover:bg-blue-700 transition-colors edit-product-btn" 
-                                    data-id="${product.id}" 
-                                    data-name="${product.name}" 
-                                    data-price="${product.price}" 
-                                    data-stock="${product.stock}" 
-                                    data-image="${product.imageLink || ''}">Edit</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.append(row);
-                });
-            } else {
-                tableBody.append('<tr><td colspan="5" class="text-center py-4">Tidak ada data produk.</td></tr>');
-            }
-            table.DataTable({ "pageLength": 10 });
-        }
-
-        // Function to update order status
-        async function updateOrderStatus(orderNumber, newStatus) {
-            Swal.fire({
-                title: 'Memperbarui status...',
-                text: 'Sedang memproses permintaan...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `action=updateStatus&orderNumber=${orderNumber}&newStatus=${newStatus}`
-                });
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    Swal.fire('Berhasil!', result.message, 'success');
-                    fetchData('getOrders', 'ordersTable', renderOrdersTable);
-                } else {
-                    Swal.fire('Error', result.message, 'error');
-                }
-            } catch (error) {
-                console.error("Error updating status:", error);
-                Swal.fire('Error', 'Gagal memperbarui status. Silakan coba lagi.', 'error');
-            }
-        }
-
-        // Function to save/update a product
-        async function saveProduct(formData) {
-            Swal.fire({
-                title: 'Menyimpan produk...',
-                text: 'Sedang memproses permintaan...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams(formData)
-                });
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    Swal.fire('Berhasil!', result.message, 'success');
-                    toggleModal('productModal', false);
-                    fetchData('getProducts', 'productsTable', renderProductsTable);
-                } else {
-                    Swal.fire('Error', result.message, 'error');
-                }
-            } catch (error) {
-                console.error("Error saving product:", error);
-                Swal.fire('Error', 'Gagal menyimpan produk. Silakan coba lagi.', 'error');
-            }
-        }
-
-        // Main logic
-        $(document).ready(function() {
-            // Login Form submission
-            $('#loginForm').on('submit', function(e) {
-                e.preventDefault();
-                const password = $('#passwordInput').val().trim();
-                
-                Swal.fire({
-                    title: 'Memeriksa password...',
-                    allowOutsideClick: false,
-                    didOpen: () => Swal.showLoading()
-                });
-
-                fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `action=verifyPassword&password=${encodeURIComponent(password)}`
-                })
-                .then(response => response.json())
-                .then(result => {
-                    Swal.close();
-                    if (result.status === 'success') {
-                        $('#loginPage').hide();
-                        $('#dashboardPage').show();
-                        fetchData('getOrders', 'ordersTable', renderOrdersTable);
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Login Gagal', text: result.message });
-                    }
-                })
-                .catch(error => {
-                    Swal.close();
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan. Silakan coba lagi.' });
-                    console.error("Login failure:", error);
-                });
-            });
-
-            // Handle tab switching
-            document.querySelectorAll('[data-tab]').forEach(tabButton => {
-                tabButton.addEventListener('click', () => {
-                    document.querySelectorAll('[data-tab]').forEach(btn => {
-                        btn.classList.remove('border-blue-500', 'text-blue-600', 'active:border-blue-500', 'active:text-blue-600');
-                        btn.classList.add('border-transparent', 'text-gray-600', 'hover:border-gray-300', 'hover:text-gray-800');
-                    });
-
-                    tabButton.classList.remove('border-transparent', 'text-gray-600', 'hover:border-gray-300', 'hover:text-gray-800');
-                    tabButton.classList.add('border-blue-500', 'text-blue-600', 'active:border-blue-500', 'active:text-blue-600');
-
-                    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
-                    document.getElementById(tabButton.getAttribute('data-tab') + '-tab-content').classList.remove('hidden');
-
-                    if (tabButton.getAttribute('data-tab') === 'products') {
-                        fetchData('getProducts', 'productsTable', renderProductsTable);
-                    } else {
-                        fetchData('getOrders', 'ordersTable', renderOrdersTable);
-                    }
-                });
-            });
-            document.getElementById('orders-tab').click(); // Show default tab
-
-            // Handle "Lihat" button click
-            $(document).on('click', '.view-items-btn', function() {
-                const items = $(this).data('items');
-                const itemsList = document.getElementById('itemsList');
-                itemsList.innerHTML = '';
-                let grandTotal = 0;
-
-                items.forEach(item => {
-                    const total = item.price * item.quantity;
-                    grandTotal += total;
-                    const listItem = document.createElement('li');
-                    listItem.className = 'flex justify-between py-2 text-sm text-gray-700';
-                    listItem.innerHTML = `
-                        <span class="font-medium">${item.name}</span>
-                        <span class="text-right">${item.quantity} x Rp ${new Intl.NumberFormat('id-ID').format(item.price)} = Rp ${new Intl.NumberFormat('id-ID').format(total)}</span>
-                    `;
-                    itemsList.appendChild(listItem);
-                });
-
-                document.getElementById('grandTotal').textContent = `Rp ${new Intl.NumberFormat('id-ID').format(grandTotal)}`;
-                toggleModal('itemsModal', true);
-            });
-
-            // Handle status change
-            $(document).on('change', '.status-changer', function() {
-                const orderNumber = $(this).data('order-number');
-                const newStatus = $(this).val();
-
-                Swal.fire({
-                    title: 'Yakin?',
-                    text: `Apakah Anda yakin ingin mengubah status pesanan ${orderNumber} menjadi "${newStatus}"?`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3B82F6',
-                    cancelButtonColor: '#EF4444',
-                    confirmButtonText: 'Ya, Ubah!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        updateOrderStatus(orderNumber, newStatus);
-                    } else {
-                        fetchData('getOrders', 'ordersTable', renderOrdersTable);
-                    }
-                });
-            });
-
-            // Handle "Tambah Produk Baru" button click
-            $('#addProductBtn').on('click', function() {
-                $('#productForm').trigger('reset');
-                $('#productId').val('');
-                $('#productModalLabel').text('Tambah Produk Baru');
-                toggleModal('productModal', true);
-            });
-
-            // Handle "Edit" button click
-            $(document).on('click', '.edit-product-btn', function() {
-                const productData = $(this).data();
-                $('#productId').val(productData.id);
-                $('#productName').val(productData.name);
-                $('#productPrice').val(productData.price);
-                $('#productStock').val(productData.stock);
-                $('#productImage').val(productData.image);
-                $('#productModalLabel').text(`Edit Produk: ${productData.name}`);
-                toggleModal('productModal', true);
-            });
-
-            // Handle form submission for Add/Edit Product
-            $('#productForm').on('submit', function(e) {
-                e.preventDefault();
-                const formData = {
-                    action: $('#productId').val() ? 'editProduct' : 'addProduct',
-                    id: $('#productId').val(),
-                    name: $('#productName').val(),
-                    price: $('#productPrice').val(),
-                    stock: $('#productStock').val(),
-                    imageLink: $('#productImage').val()
-                };
-                saveProduct(formData);
-            });
+            const navLinks = document.querySelectorAll('.sidebar-nav-item a');
+            navLinks.forEach(link => link.classList.remove('active'));
+            element.classList.add('active');
             
-            // Handle refresh button
-            $('#refreshOrdersBtn').on('click', function() {
-                 fetchData('getOrders', 'ordersTable', renderOrdersTable);
+            // Update page title
+            const pageTitle = document.getElementById('pageTitle');
+            if (sectionId === 'dashboard') pageTitle.textContent = 'Dashboard';
+            if (sectionId === 'kelola-pesanan') pageTitle.textContent = 'Kelola Pesanan';
+            if (sectionId === 'kelola-produk') pageTitle.textContent = 'Kelola Produk';
+
+            // Load data for the selected section
+            if (sectionId === 'kelola-pesanan') {
+                fetchOrders();
+            } else if (sectionId === 'kelola-produk') {
+                fetchProducts();
+            } else if (sectionId === 'dashboard') {
+                fetchDashboardData();
+            }
+        }
+
+        // --- Fungsi Loading ---
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // --- Fungsi Dashboard ---
+        async function fetchDashboardData() {
+            showLoading();
+            const [ordersResponse, productsResponse] = await Promise.all([
+                fetch(`${WEB_APP_URL}?action=getOrders`),
+                fetch(`${WEB_APP_URL}?action=getProducts`)
+            ]);
+
+            const orders = await ordersResponse.json();
+            const products = await productsResponse.json();
+
+            hideLoading();
+            
+            if (orders.error || products.error) {
+                alert("Gagal memuat data dashboard.");
+                return;
+            }
+
+            const totalOrders = orders.length;
+            const ordersConfirmed = orders.filter(o => o.Status === "Selesai").length;
+            const totalRevenue = orders
+                .filter(o => o.Status === "Selesai")
+                .reduce((sum, order) => {
+                    const orderItems = order.Items || [];
+                    const orderTotal = orderItems.reduce((itemSum, item) => itemSum + (item.price * item.quantity), 0);
+                    return sum + orderTotal;
+                }, 0);
+            
+            const dashboardStats = document.getElementById("dashboardStats");
+            dashboardStats.innerHTML = `
+                <div class="stat-card">
+                    <i class="fas fa-chart-bar stat-icon"></i>
+                    <p class="stat-value">${totalOrders}</p>
+                    <p class="stat-label">Total Pesanan</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-check-circle stat-icon"></i>
+                    <p class="stat-value">${ordersConfirmed}</p>
+                    <p class="stat-label">Pesanan Selesai</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-dollar-sign stat-icon"></i>
+                    <p class="stat-value">Rp${totalRevenue.toLocaleString('id-ID')}</p>
+                    <p class="stat-label">Total Pendapatan</p>
+                </div>
+            `;
+
+            // Display latest orders
+            const latestOrdersTableBody = document.getElementById("latestOrdersTableBody");
+            latestOrdersTableBody.innerHTML = '';
+            orders.slice(0, 5).forEach(order => { // Show top 5 latest orders
+                const row = `
+                    <tr>
+                        <td>${order.Tanggal}</td>
+                        <td>${order["Order Number"]}</td>
+                        <td>${order["Nama Pelanggan"]}</td>
+                        <td><span class="status-badge ${order.Status.split(' ')[0]}">${order.Status}</span></td>
+                        <td><button class="btn btn-primary" onclick="viewOrderDetails('${order["Order Number"]}')">Detail</button></td>
+                    </tr>
+                `;
+                latestOrdersTableBody.innerHTML += row;
             });
+        }
+
+
+        // --- Fungsi Manajemen Produk ---
+        async function fetchProducts() {
+            showLoading();
+            const response = await fetch(`${WEB_APP_URL}?action=getProducts`);
+            const result = await response.json();
+            hideLoading();
+            
+            if (result.error) {
+                alert("Gagal memuat produk: " + result.error);
+                return;
+            }
+
+            const tableBody = document.getElementById("productTableBody");
+            tableBody.innerHTML = '';
+            result.forEach(product => {
+                const row = `
+                    <tr>
+                        <td>${product.id}</td>
+                        <td>
+                            ${product.imageLink ? `<img src="${product.imageLink}" alt="${product.name}" class="product-image">` : 'Tidak ada gambar'}
+                        </td>
+                        <td>${product.name}</td>
+                        <td>Rp${product.price.toLocaleString('id-ID')}</td>
+                        <td>${product.stock}</td>
+                        <td>
+                            <button class="btn btn-warning" onclick="editProduct('${product.id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteProduct('${product.id}')">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function openProductModal(product = null) {
+            const modal = document.getElementById("productModal");
+            const form = document.getElementById("productForm");
+            const modalTitle = document.getElementById("modalTitle");
+
+            form.reset();
+            document.getElementById("productId").value = '';
+            document.getElementById("previewImage").style.display = 'none';
+            document.getElementById("productImageUrl").value = '';
+
+            if (product) {
+                modalTitle.textContent = "Edit Produk";
+                document.getElementById("productId").value = product.id;
+                document.getElementById("productName").value = product.name;
+                document.getElementById("productPrice").value = product.price;
+                document.getElementById("productStock").value = product.stock;
+                document.getElementById("productImageUrl").value = product.imageLink;
+                if (product.imageLink) {
+                    document.getElementById("previewImage").src = product.imageLink;
+                    document.getElementById("previewImage").style.display = 'block';
+                }
+            } else {
+                modalTitle.textContent = "Tambah Produk Baru";
+            }
+            modal.style.display = "block";
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        document.getElementById("productForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            showLoading();
+            const productId = document.getElementById("productId").value;
+            const imageName = document.getElementById("productImage").files[0] ? document.getElementById("productImage").files[0].name : null;
+            let imageUrl = document.getElementById("productImageUrl").value;
+            
+            if (document.getElementById("productImage").files[0]) {
+                const uploadedUrl = await uploadImage(document.getElementById("productImage").files[0]);
+                if (uploadedUrl) {
+                    imageUrl = uploadedUrl;
+                } else {
+                    hideLoading();
+                    alert("Gagal mengunggah gambar. Produk tidak disimpan.");
+                    return;
+                }
+            }
+
+            const productData = {
+                action: "saveProduct",
+                id: productId ? productId : undefined,
+                name: document.getElementById("productName").value,
+                price: parseFloat(document.getElementById("productPrice").value),
+                stock: parseInt(document.getElementById("productStock").value),
+                imageLink: imageUrl,
+                imageName: imageName
+            };
+
+            const response = await fetch(WEB_APP_URL, {
+                method: "POST",
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(productData)
+            });
+            const result = await response.json();
+            
+            hideLoading();
+            if (result.success) {
+                alert(result.message);
+                closeModal('productModal');
+                fetchProducts();
+            } else {
+                alert("Error: " + result.error);
+            }
         });
+
+        async function editProduct(id) {
+            showLoading();
+            const response = await fetch(`${WEB_APP_URL}?action=getProducts`);
+            const products = await response.json();
+            hideLoading();
+            const product = products.find(p => String(p.id) === String(id));
+            if (product) {
+                openProductModal(product);
+            } else {
+                alert("Produk tidak ditemukan.");
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm("Apakah Anda yakin ingin menghapus produk ini?")) {
+                return;
+            }
+            showLoading();
+            const response = await fetch(WEB_APP_URL, {
+                method: "POST",
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: "deleteProduct", id: id })
+            });
+            const result = await response.json();
+            hideLoading();
+            if (result.success) {
+                alert("Produk berhasil dihapus.");
+                fetchProducts();
+            } else {
+                alert("Error: " + result.error);
+            }
+        }
+        
+        async function uploadImage(file) {
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onloadend = async function() {
+                    const base64data = reader.result.split(',')[1];
+                    const url = `${WEB_APP_URL}?action=uploadImage&filename=${file.name}&contentType=${file.type}&image=${encodeURIComponent(base64data)}`;
+                    try {
+                        const response = await fetch(url, { method: 'POST' });
+                        const result = await response.json();
+                        if (result.success) {
+                            resolve(result.imageUrl);
+                        } else {
+                            alert("Error saat mengunggah gambar: " + result.error);
+                            resolve(null);
+                        }
+                    } catch (error) {
+                        alert("Error saat mengunggah gambar: " + error.message);
+                        resolve(null);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function previewFile() {
+            const preview = document.getElementById('previewImage');
+            const file = document.getElementById('productImage').files[0];
+            const reader = new FileReader();
+
+            reader.onloadend = function () {
+                preview.src = reader.result;
+                preview.style.display = 'block';
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = "";
+                preview.style.display = 'none';
+            }
+        }
+
+        // --- Fungsi Manajemen Pesanan ---
+        async function fetchOrders() {
+            showLoading();
+            const response = await fetch(`${WEB_APP_URL}?action=getOrders`);
+            const result = await response.json();
+            hideLoading();
+
+            if (result.error) {
+                alert("Gagal memuat pesanan: " + result.error);
+                return;
+            }
+            
+            const tableBody = document.getElementById("orderTableBody");
+            tableBody.innerHTML = '';
+            result.forEach(order => {
+                const row = `
+                    <tr>
+                        <td>${order.Tanggal}</td>
+                        <td>${order["Order Number"]}</td>
+                        <td>${order["Nama Pelanggan"]}</td>
+                        <td>${order.Items.map(item => `${item.name} (${item.quantity})`).join(', ')}</td>
+                        <td>${order["Metode Pembayaran"]}</td>
+                        <td><span class="status-badge ${order.Status.split(' ')[0]}">${order.Status}</span></td>
+                        <td>
+                            <button class="btn btn-primary" onclick="viewOrderDetails('${order["Order Number"]}')">Detail</button>
+                            <select class="btn" onchange="updateStatus('${order["Order Number"]}', this.value)">
+                                <option value="" disabled selected>Ubah Status</option>
+                                <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
+                                <option value="Diproses">Diproses</option>
+                                <option value="Selesai">Selesai</option>
+                                <option value="Dibatalkan">Dibatalkan</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+        
+        async function viewOrderDetails(orderNumber) {
+            showLoading();
+            const response = await fetch(`${WEB_APP_URL}?action=getOrders`);
+            const orders = await response.json();
+            hideLoading();
+            const order = orders.find(o => String(o["Order Number"]) === String(orderNumber));
+            
+            if (order) {
+                document.getElementById('orderNumberDetails').textContent = order['Order Number'];
+                document.getElementById('orderDateDetails').textContent = order.Tanggal;
+                document.getElementById('customerNameDetails').textContent = order['Nama Pelanggan'];
+                document.getElementById('customerNumberDetails').textContent = order['Nomor Telepon'];
+                document.getElementById('customerAddressDetails').textContent = order.Alamat;
+                document.getElementById('paymentMethodDetails').textContent = order['Metode Pembayaran'];
+                document.getElementById('statusDetails').textContent = order.Status;
+                
+                const itemsList = document.getElementById('orderItemsList');
+                itemsList.innerHTML = '';
+                order.Items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.name} x${item.quantity} (Rp${item.price.toLocaleString('id-ID')}) - Total: Rp${(item.price * item.quantity).toLocaleString('id-ID')}`;
+                    itemsList.appendChild(li);
+                });
+                
+                document.getElementById('orderDetailsModal').style.display = 'block';
+            } else {
+                alert("Detail pesanan tidak ditemukan.");
+            }
+        }
+
+        async function updateStatus(orderNumber, status) {
+            if (!status) return;
+            showLoading();
+            const response = await fetch(WEB_APP_URL, {
+                method: "POST",
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ 
+                    action: "updateOrderStatus", 
+                    orderNumber: orderNumber, 
+                    status: status 
+                })
+            });
+            const result = await response.json();
+            hideLoading();
+            if (result.success) {
+                alert("Status berhasil diubah.");
+                fetchOrders();
+            } else {
+                alert("Error: " + result.error);
+            }
+        }
     </script>
 </body>
 </html>
