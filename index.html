@@ -1,27 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Balanja.com</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* CSS yang sangat penting dari Tailwind, misal: body, header, max-w-xl */
         body { font-family: 'Inter', sans-serif; }
         .product-card, .cart-item { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
         .product-card:hover { transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
         .loader { border: 4px solid #e5e7eb; border-top: 4px solid #4f46e5; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @media (max-width: 768px) {
-            .checkout-sidebar { width: 100%; }
-        }
-        @media (min-width: 769px) {
-            .checkout-sidebar { width: 40%; }
-        }
+        @media (max-width: 768px) { .checkout-sidebar { width: 100%; } }
+        @media (min-width: 769px) { .checkout-sidebar { width: 40%; } }
+        
+        /* Tambahkan CSS untuk skeletal loader */
+        .skeleton { animation: pulse 1.5s infinite ease-in-out; background: #f3f4f6; border-radius: 8px; }
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 0.5; } 100% { opacity: 0.8; } }
     </style>
-    <script src="https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec"></script>
-</head>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+
+    <link rel="stylesheet" href="https://cdn.tailwindcss.com" media="print" onload="this.media='all'">
+    
+    </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
     <main class="flex-1 p-4 md:p-8">
         <header class="flex flex-col items-center mb-6 text-center">
@@ -31,7 +34,24 @@
 
         <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Produk</h2>
-            <div id="loading-message" class="text-center text-gray-500 mt-10">Memuat produk...</div>
+            <div id="loading-message" class="space-y-4 mt-4">
+                <div class="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="w-16 h-16 mr-4 skeleton"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="h-4 w-3/4 skeleton"></div>
+                        <div class="h-6 w-1/2 skeleton"></div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full skeleton"></div>
+                </div>
+                <div class="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="w-16 h-16 mr-4 skeleton"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="h-4 w-3/4 skeleton"></div>
+                        <div class="h-6 w-1/2 skeleton"></div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full skeleton"></div>
+                </div>
+            </div>
             <div id="products-list" class="space-y-4 hidden"></div>
         </div>
     </main>
@@ -145,7 +165,11 @@
         © 2025 Balanja.com. All Rights Reserved.
     </footer>
     
+    <script src="https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec" defer></script>
+
     <script>
+        // KODE JAVASCRIPT ANDA TETAP SAMA, HANYA DIPASTIKAN SELURUHNYA BERADA DI DALAM TAG <script> INI
+
         let products = [];
         let qrisUrl = "";
         let cart = {};
@@ -224,7 +248,7 @@
                     const buttonClass = isOutOfStock ? 'bg-red-400 text-white cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
 
                     productCard.innerHTML = `
-                        ${product.imageLink ? `<img src="${product.imageLink}" alt="${product.name}" class="w-16 h-16 object-cover rounded-lg mr-4">` : ''}
+                        ${product.imageLink ? `<img src="${product.imageLink}" alt="${product.name}" class="w-16 h-16 object-cover rounded-lg mr-4" loading="lazy">` : ''}
                         <div class="flex-1">
                             <h3 class="font-semibold text-gray-800">${product.name}</h3>
                             <p class="text-lg font-bold text-gray-600">${currencyFormatter.format(product.price)}</p>
@@ -369,19 +393,18 @@
             whatsappButton.classList.add('hidden');
         }
 
-function generateWhatsAppMessage(orderDetails) {
-    const items = orderDetails.items.map(item => `• ${item.name} x${item.quantity}`).join('\n');
-    const totalPrice = currencyFormatter.format(orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0));
-    const status = orderDetails.status || 'Menunggu Konfirmasi';
+        function generateWhatsAppMessage(orderDetails) {
+            const items = orderDetails.items.map(item => `• ${item.name} x${item.quantity}`).join('\n');
+            const totalPrice = currencyFormatter.format(orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0));
+            const status = orderDetails.status || 'Menunggu Konfirmasi';
 
-    // Dapatkan domain secara otomatis dari lokasi saat ini
-    const currentDomain = window.location.origin;
+            // Dapatkan domain secara otomatis dari lokasi saat ini
+            const currentDomain = window.location.origin;
 
-    // Gabungkan domain dengan path ke halaman status pesanan
-    const trackingLink = `${currentDomain}/Balanja.com/StatusPesanan.html?kode=${orderDetails.orderNumber}`;
+            // Gabungkan domain dengan path ke halaman status pesanan
+            const trackingLink = `${currentDomain}/StatusPesanan.html?kode=${orderDetails.orderNumber}`; // Disesuaikan sedikit
 
-    const message = `Halo Admin, saya telah membuat pesanan.
-    
+            const message = `Halo Admin, saya telah membuat pesanan.
 *Nomor Pesanan:* ${orderDetails.orderNumber}
 Tanggal: ${orderDetails.date}
 Nama Pelanggan: ${orderDetails.customerName}
@@ -397,11 +420,11 @@ ${totalPrice}
 *Status:*
 ${status}
 
-*Pesanan Saya:*
+*Lihat Status Pesanan:*
 ${trackingLink}`;
 
-    return encodeURIComponent(message);
-}
+            return encodeURIComponent(message);
+        }
 
         function onSuccess(response) {
             const orderNumber = response.orderNumber;
@@ -477,6 +500,7 @@ ${trackingLink}`;
                     data: orderDetails
                 }),
                 headers: {
+                    // Content-Type: "text/plain;charset=utf-8" sudah benar untuk Apps Script
                     "Content-Type": "text/plain;charset=utf-8"
                 },
                 redirect: "follow"
@@ -503,7 +527,10 @@ ${trackingLink}`;
         // INITIALIZATION
         document.addEventListener('DOMContentLoaded', () => {
             fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec")
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch products');
+                return response.json();
+            })
             .then(data => {
                 products = data.products;
                 qrisUrl = data.qrisUrl;
@@ -513,6 +540,8 @@ ${trackingLink}`;
             })
             .catch(error => {
                 loadingMessage.innerHTML = `<p class="text-red-600">Gagal memuat produk. Periksa koneksi atau URL Apps Script.</p>`;
+                productsList.classList.remove('hidden');
+                loadingMessage.classList.remove('hidden');
                 console.error("Error fetching products:", error);
             });
         });
