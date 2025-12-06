@@ -758,20 +758,25 @@
             placeOrderButton.disabled = false;
         }
 
-        function showModal(title, message, isSuccess = true, orderNumber = null) {
-            modalTitle.textContent = title;
-            modalTitle.className = `text-xl font-bold mb-4 ${isSuccess ? 'text-gray-800' : 'text-red-600'}`;
-            modalMessage.innerHTML = message;
-            
-            if (isSuccess && orderNumber) {
-                const trackingLink = `StatusPesanan.html?kode=${orderNumber}`;
-                modalLink.href = trackingLink;
-                modalLink.classList.remove('hidden');
-            } else {
-                modalLink.classList.add('hidden');
-            }
-            modal.classList.remove('hidden');
-        }
+function showModal(title, message, isSuccess = true, orderNumber = null) {
+    modalTitle.textContent = title;
+    modalTitle.className = `text-xl font-bold mb-4 ${isSuccess ? 'text-gray-800' : 'text-red-600'}`;
+    modalMessage.innerHTML = message;
+
+    if (isSuccess && orderNumber) {
+        const currentDomain = window.location.origin;
+        const path = window.location.pathname.replace(/\/[^/]*$/, ''); 
+        const trackingLink = `${currentDomain}${path}/StatusPesanan.html?kode=${orderNumber}`;
+
+        modalLink.href = trackingLink;
+        modalLink.classList.remove('hidden');
+    } else {
+        modalLink.classList.add('hidden');
+    }
+
+    modal.classList.remove('hidden');
+}
+
 
         function hideModal() { 
             modal.classList.add('hidden');
@@ -784,8 +789,9 @@
             const status = orderDetails.status || 'Menunggu Konfirmasi';
             const paymentProof = orderDetails.paymentProofUrl && orderDetails.paymentProofUrl !== 'N/A' ? `\nBukti Transfer: ${orderDetails.paymentProofUrl}` : '';
 
-            const currentDomain = window.location.origin;
-            const trackingLink = `${currentDomain}/StatusPesanan.html?kode=${orderDetails.orderNumber}`;
+const currentDomain = window.location.origin;
+const path = window.location.pathname.replace(/\/[^/]*$/, ''); 
+const trackingLink = `${currentDomain}${path}/StatusPesanan.html?kode=${orderDetails.orderNumber}`;
 
             const message = `Halo Admin, saya telah membuat pesanan.
 *Nomor Pesanan:* ${orderDetails.orderNumber}
