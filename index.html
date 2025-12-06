@@ -11,16 +11,12 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; }
-        /* Transisi halus saat hover pada kartu */
         .product-card, .cart-item { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
         .product-card:hover { transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        /* Loader standar */
         .loader { border: 4px solid #e5e7eb; border-top: 4px solid #4f46e5; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* Skeleton Loader */
         .skeleton { animation: pulse 1.5s infinite ease-in-out; background: #f3f4f6; border-radius: 8px; }
         @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 0.5; } 100% { opacity: 0.8; } }
-        /* Responsif Sidebar Checkout */
         .checkout-sidebar { width: 100%; max-width: 450px; }
         @media (min-width: 768px) { .checkout-sidebar { width: 450px; } }
     </style>
@@ -141,9 +137,10 @@
                 <div id="upload-proof-container" class="bg-gray-50 p-6 rounded-xl shadow-inner mt-6 hidden">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Bukti Pembayaran</h2>
                     <div>
-                        <label for="paymentProof" class="block text-sm font-medium text-gray-700">Unggah Bukti Transaksi (URL Gambar)</label>
-                        <input type="url" id="paymentProof" name="paymentProof" placeholder="Masukkan link gambar (misal: Imgur, Google Drive)" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-500 focus:ring focus:ring-gray-200 focus:ring-opacity-50 py-3 px-4">
-                        <p class="text-xs text-gray-500 mt-1">Harap unggah gambar bukti transfer ke layanan hosting dan masukkan URL-nya.</p>
+                        <label for="paymentProofFile" class="block text-sm font-medium text-gray-700">Unggah Bukti Transaksi (JPG/PNG)</label>
+                        <input type="file" id="paymentProofFile" accept="image/jpeg, image/png" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-gray-500 focus:ring focus:ring-gray-200 focus:ring-opacity-50 py-3 px-4 bg-white">
+                        <p class="text-xs text-gray-500 mt-1">File akan diunggah ke Google Drive Anda.</p>
+                        <div id="upload-status" class="hidden text-sm mt-2 text-gray-600"></div>
                     </div>
                 </div>
             </div>
@@ -158,6 +155,18 @@
                 </button>
             </div>
         </form>
+    </div>
+
+    <div id="variant-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 hidden z-[60]">
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
+            <h3 class="text-xl font-bold text-gray-800 mb-4" id="variant-modal-title">Pilih Varian</h3>
+            <div id="variant-options" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="close-variant-modal" class="py-2 px-4 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition">Batal</button>
+                <button id="add-variant-to-cart" class="py-2 px-4 text-sm font-bold text-white bg-gray-800 rounded-lg hover:bg-gray-900 transition disabled:bg-gray-400" disabled>Tambahkan ke Keranjang</button>
+            </div>
+        </div>
     </div>
 
     <div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 hidden z-[60]">
@@ -180,11 +189,14 @@
     <script src="https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec" defer></script>
 
     <script>
-        // INISIALISASI VARIABEL SAMA SEPERTI SEBELUMNYA
         let products = [];
         let qrisUrl = "";
         let cart = {};
+        let selectedVariantId = null; // Menyimpan ID produk utama yang variannya sedang dipilih
+
         const currencyFormatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+        
+        // Elemen Produk & Keranjang
         const productsList = document.getElementById('products-list');
         const cartSidebar = document.getElementById('cart-sidebar');
         const cartIconButton = document.getElementById('cart-icon');
@@ -196,6 +208,8 @@
         const checkoutButton = document.getElementById('checkout-button');
         const cartPlaceholder = document.getElementById('cart-placeholder');
         const loadingMessage = document.getElementById('loading-message');
+        
+        // Elemen Checkout
         const checkoutSidebar = document.getElementById('checkout-sidebar');
         const closeCheckoutButton = document.getElementById('close-checkout');
         const orderItemsList = document.getElementById('order-items');
@@ -205,25 +219,30 @@
         const paymentMethodRadios = document.getElementsByName('paymentMethod');
         const submitText = document.getElementById('submit-text');
         const submitLoader = document.getElementById('submit-loader');
+        const paymentDetailsContainer = document.getElementById('payment-details-container');
+        const qrisContainer = document.getElementById('qris-container');
+        const bsiContainer = document.getElementById('bsi-container');
+        const uploadProofContainer = document.getElementById('upload-proof-container');
+        const paymentProofFile = document.getElementById('paymentProofFile'); // Ganti dengan input file
+        const uploadStatusEl = document.getElementById('upload-status'); // Status upload
+        
+        // Elemen Modal
         const modal = document.getElementById('modal');
         const modalTitle = document.getElementById('modal-title');
         const modalMessage = document.getElementById('modal-message');
         const modalLink = document.getElementById('modal-link');
         const modalClose = document.getElementById('modal-close');
-        const qrisImageCheckout = document.getElementById('qris-image-checkout');
         const whatsappButton = document.getElementById('whatsapp-button');
-        const paymentDetailsContainer = document.getElementById('payment-details-container');
-        const qrisContainer = document.getElementById('qris-container');
-        const bsiContainer = document.getElementById('bsi-container');
-        const uploadProofContainer = document.getElementById('upload-proof-container');
-        const paymentProofInput = document.getElementById('paymentProof');
+        
+        // Elemen Modal Varian (BARU)
+        const variantModal = document.getElementById('variant-modal');
+        const variantModalTitle = document.getElementById('variant-modal-title');
+        const variantOptionsContainer = document.getElementById('variant-options');
+        const closeVariantModalButton = document.getElementById('close-variant-modal');
+        const addVariantToCartButton = document.getElementById('add-variant-to-cart');
 
+        // --- FUNGSI CORE ---
 
-        // FUNGSI-FUNGSI UTAMA (TIDAK BERUBAH DARI VERSI SEBELUMNYA)
-
-        /**
-         * Mengambil detail produk/varian.
-         */
         function getProduct(id, variantName = null) {
             const product = products.find(p => p.id === id);
             if (!product) return null;
@@ -235,11 +254,12 @@
                         ...product,
                         variantName: variant.name,
                         price: variant.price,
-                        stock: variant.stock,
-                        uniqueId: `${id}-${variant.name}`
+                        stock: variant.stock, 
+                        uniqueId: `${id}-${variant.name}` 
                     };
                 }
             }
+            // Untuk produk utama tanpa varian
             return {
                 ...product,
                 uniqueId: id,
@@ -247,9 +267,6 @@
             };
         }
 
-        /**
-         * Menambah kuantitas item ke keranjang.
-         */
         function updateCartItem(productId, variantName = null) {
             const product = getProduct(productId, variantName);
             if (!product) return;
@@ -270,14 +287,11 @@
                     showModal('Stok Habis', `Stok untuk produk "${product.name}${product.variantName ? ' (' + product.variantName + ')' : ''}" saat ini kosong.`, false);
                 }
             }
-            renderProducts(products);
+            renderProducts(products); // Render ulang untuk update stok
             renderCart();
             saveCart();
         }
 
-        /**
-         * Mengurangi kuantitas item di keranjang.
-         */
         function decrementQuantity(uniqueId) {
             if (cart[uniqueId]) {
                 cart[uniqueId].quantity--;
@@ -285,13 +299,58 @@
                     delete cart[uniqueId];
                 }
             }
-            renderProducts(products);
+            renderProducts(products); 
             renderCart();
             saveCart();
         }
 
+        function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
+        
+        function loadCart() {
+            try {
+                const savedCart = localStorage.getItem('cart');
+                if (savedCart) {
+                    const parsedCart = JSON.parse(savedCart);
+                    cart = Object.fromEntries(
+                        Object.entries(parsedCart).filter(([uniqueId, item]) => {
+                            const productId = item.id;
+                            const variantName = item.variantName;
+                            const product = getProduct(productId, variantName);
+                            
+                            if (product && product.stock > 0) {
+                                item.price = product.price;
+                                item.stock = product.stock;
+                                if (item.quantity > item.stock) {
+                                    item.quantity = item.stock;
+                                }
+                                return item.quantity > 0;
+                            }
+                            return false;
+                        })
+                    );
+                }
+            } catch (e) {
+                console.error("Failed to load cart from local storage", e);
+                cart = {};
+            }
+        }
+
+        function calculateTotal() {
+            const total = Object.values(cart).reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            totalPriceEl.textContent = currencyFormatter.format(total);
+            totalPriceButtonEl.textContent = currencyFormatter.format(total);
+        }
+
+        function updateCartCount() {
+            const count = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+            cartCountEl.textContent = count;
+            if (count > 0) { cartCountEl.classList.remove('hidden'); } else { cartCountEl.classList.add('hidden'); }
+        }
+
+        // --- RENDER & UI ---
+
         /**
-         * Merender daftar produk (membuat kartu produk).
+         * Merender daftar produk (hanya menampilkan produk utama).
          */
         function renderProducts(productsData) {
             products = productsData;
@@ -301,29 +360,26 @@
                 productsList.innerHTML = `<p class="text-center text-gray-400">Tidak ada produk yang tersedia.</p>`;
             } else {
                 products.forEach(product => {
-                    if (product.variants && product.variants.length > 0) {
-                        product.variants.forEach(variant => {
-                            const variantProduct = getProduct(product.id, variant.name);
-                            if (variantProduct) {
-                                const productCard = createProductCard(variantProduct);
-                                productsList.appendChild(productCard);
-                            }
-                        });
-                    } else if (product.stock >= 0) { // Termasuk stok 0
-                        const baseProduct = getProduct(product.id);
-                        const productCard = createProductCard(baseProduct);
-                        productsList.appendChild(productCard);
-                    }
+                    const productCard = createProductCard(product);
+                    productsList.appendChild(productCard);
                 });
             }
             loadingMessage.classList.add('hidden');
             productsList.classList.remove('hidden');
 
-            document.querySelectorAll('.add-to-cart').forEach(button => {
+            document.querySelectorAll('.add-product-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    const productId = parseInt(e.target.dataset.id);
-                    const variantName = e.target.dataset.variant || null;
-                    updateCartItem(productId, variantName);
+                    const productId = parseInt(e.currentTarget.dataset.id);
+                    const product = products.find(p => p.id === productId);
+
+                    if (product && product.hasVariants && product.variants && product.variants.length > 0) {
+                        openVariantModal(productId, product.variants);
+                    } else if (product && product.stock > 0) {
+                        // Jika tidak ada varian dan stok ada, langsung tambahkan
+                        updateCartItem(productId);
+                    } else {
+                        showModal('Stok Habis', `Stok untuk produk "${product.name}" saat ini kosong.`, false);
+                    }
                 });
             });
         }
@@ -332,33 +388,39 @@
          * Membuat elemen kartu produk HTML.
          */
         function createProductCard(product) {
-            const productCard = document.createElement('div');
-            const quantityInCart = cart[product.uniqueId]?.quantity || 0;
-            const availableStock = product.stock - quantityInCart;
-
-            const isOutOfStock = availableStock <= 0;
-            const buttonText = isOutOfStock ? 'Stok Habis' : '+';
+            // Tentukan harga/stok yang ditampilkan: harga termurah atau harga base.
+            let displayPrice = product.price;
+            let displayStock = product.stock;
+            let labelText = "Tambah";
+            
+            if (product.hasVariants && product.variants && product.variants.length > 0) {
+                const minPrice = Math.min(...product.variants.map(v => v.price));
+                displayPrice = minPrice;
+                displayStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
+                labelText = "Pilih Varian";
+            }
+            
+            const isOutOfStock = displayStock <= 0;
+            const buttonText = isOutOfStock ? 'Stok Habis' : (product.hasVariants ? 'Pilih Varian' : '+');
             const buttonClass = isOutOfStock ? 'bg-red-400 text-white cursor-not-allowed' : 'bg-gray-800 text-white hover:bg-gray-900';
             
+            const productCard = document.createElement('div');
             productCard.className = 'product-card flex items-center p-4 bg-white rounded-xl shadow-md border border-gray-100';
             
             productCard.innerHTML = `
                 ${product.imageLink ? `<img src="${product.imageLink}" alt="${product.name}" class="w-16 h-16 object-cover rounded-lg mr-4" loading="lazy">` : ''}
                 <div class="flex-1">
-                    <h3 class="font-semibold text-gray-800">${product.name} ${product.variantName ? `<span class="text-sm text-gray-500">(${product.variantName})</span>` : ''}</h3>
-                    <p class="text-lg font-bold text-gray-600">${currencyFormatter.format(product.price)}</p>
-                    <p class="text-xs text-gray-500 mt-1">Stok: <span class="${isOutOfStock ? 'text-red-500 font-bold' : 'text-green-500 font-bold'}">${availableStock}</span></p>
+                    <h3 class="font-semibold text-gray-800">${product.name}</h3>
+                    <p class="text-lg font-bold text-gray-600">${currencyFormatter.format(displayPrice)} ${product.hasVariants ? `<span>+</span>` : ''}</p>
+                    <p class="text-xs text-gray-500 mt-1">Stok Total: <span class="${isOutOfStock ? 'text-red-500 font-bold' : 'text-green-500 font-bold'}">${displayStock}</span></p>
                 </div>
-                <button data-id="${product.id}" data-variant="${product.variantName || ''}" class="add-to-cart font-bold w-10 h-10 rounded-full flex items-center justify-center transition duration-300 ${buttonClass}" ${isOutOfStock ? 'disabled' : ''}>
-                    ${buttonText}
+                <button data-id="${product.id}" class="add-product-btn font-bold w-10 h-10 rounded-full flex items-center justify-center transition duration-300 ${buttonClass}" ${isOutOfStock ? 'disabled' : ''}>
+                    ${product.hasVariants ? `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>` : '+'}
                 </button>
             `;
             return productCard;
         }
 
-        /**
-         * Merender keranjang di sidebar.
-         */
         function renderCart() {
             cartItemsList.innerHTML = '';
             const cartItems = Object.values(cart);
@@ -406,49 +468,270 @@
                 });
             });
         }
-
-        function calculateTotal() {
-            const total = Object.values(cart).reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            totalPriceEl.textContent = currencyFormatter.format(total);
-            totalPriceButtonEl.textContent = currencyFormatter.format(total);
-        }
-
-        function updateCartCount() {
-            const count = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
-            cartCountEl.textContent = count;
-            if (count > 0) { cartCountEl.classList.remove('hidden'); } else { cartCountEl.classList.add('hidden'); }
-        }
-
-        function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
         
-        function loadCart() {
-            try {
-                const savedCart = localStorage.getItem('cart');
-                if (savedCart) {
-                    const parsedCart = JSON.parse(savedCart);
-                    cart = Object.fromEntries(
-                        Object.entries(parsedCart).filter(([uniqueId, item]) => {
-                            const productId = item.id;
-                            const variantName = item.variantName;
-                            const product = getProduct(productId, variantName);
-                            
-                            if (product && product.stock > 0) {
-                                item.price = product.price;
-                                item.stock = product.stock;
-                                if (item.quantity > item.stock) {
-                                    item.quantity = item.stock;
-                                }
-                                return item.quantity > 0;
-                            }
-                            return false;
-                        })
-                    );
-                }
-            } catch (e) {
-                console.error("Failed to load cart from local storage", e);
-                cart = {};
-            }
+        // --- MODAL VARIAN BARU ---
+        
+        function openVariantModal(productId, variants) {
+            selectedVariantId = productId;
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            variantModalTitle.textContent = `Pilih Varian ${product.name}`;
+            variantOptionsContainer.innerHTML = '';
+            addVariantToCartButton.disabled = true; // Nonaktifkan sampai varian dipilih
+
+            variants.forEach(variant => {
+                const uniqueId = `${productId}-${variant.name}`;
+                const quantityInCart = cart[uniqueId]?.quantity || 0;
+                const availableStock = variant.stock - quantityInCart;
+                const isOutOfStock = availableStock <= 0;
+                
+                const optionEl = document.createElement('label');
+                optionEl.className = `flex items-center justify-between p-3 rounded-lg bg-white shadow-sm border border-gray-200 cursor-pointer transition ${isOutOfStock ? 'bg-red-50' : 'hover:bg-gray-100'}`;
+                
+                optionEl.innerHTML = `
+                    <div class="flex items-center">
+                        <input type="radio" name="selectedVariant" value="${variant.name}" data-stock="${availableStock}" class="form-radio text-gray-800 focus:ring-gray-500" ${isOutOfStock ? 'disabled' : ''}>
+                        <span class="ml-3 text-sm font-medium text-gray-700">${variant.name}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-bold text-gray-800">${currencyFormatter.format(variant.price)}</span>
+                        <p class="text-xs text-gray-500 mt-1 ${isOutOfStock ? 'text-red-500' : ''}">${isOutOfStock ? 'Stok Habis' : `Stok: ${availableStock}`}</p>
+                    </div>
+                `;
+                variantOptionsContainer.appendChild(optionEl);
+            });
+
+            variantModal.classList.remove('hidden');
+
+            // Event listener untuk pilihan radio button di modal
+            document.querySelectorAll('input[name="selectedVariant"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const selectedStock = parseInt(radio.dataset.stock);
+                    addVariantToCartButton.disabled = selectedStock <= 0;
+                });
+            });
         }
+
+        // --- UPLOAD FILE KE DRIVE ---
+
+        /**
+         * Mengubah file gambar menjadi base64 dan mengunggahnya via Apps Script.
+         * @returns {Promise<string>} URL gambar yang diunggah.
+         */
+        function uploadProofImage() {
+            return new Promise((resolve, reject) => {
+                const file = paymentProofFile.files[0];
+                if (!file) {
+                    // Jika tidak ada file, resolve dengan string kosong, nanti akan jadi N/A
+                    resolve("");
+                    return;
+                }
+
+                uploadStatusEl.textContent = 'Mengunggah file...';
+                uploadStatusEl.classList.remove('hidden');
+
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+
+                reader.onload = function () {
+                    const base64Content = reader.result.split(',')[1];
+                    
+                    fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            action: "uploadImage",
+                            image: base64Content,
+                            contentType: file.type,
+                            filename: file.name
+                        }),
+                        headers: {
+                             "Content-Type": "text/plain;charset=utf-8"
+                        },
+                        redirect: "follow"
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Upload Network failed');
+                        return response.json();
+                    })
+                    .then(result => {
+                        if (result.success) {
+                            uploadStatusEl.textContent = 'Upload berhasil!';
+                            resolve(result.imageUrl);
+                        } else {
+                            throw new Error(result.error || 'Gagal mengunggah gambar ke Drive.');
+                        }
+                    })
+                    .catch(error => {
+                        uploadStatusEl.textContent = `Gagal upload: ${error.message}`;
+                        reject(error);
+                    });
+                };
+
+                reader.onerror = function (error) {
+                    uploadStatusEl.textContent = 'Gagal membaca file.';
+                    reject(error);
+                };
+            });
+        }
+
+        // --- FUNGSI SUBMIT (Diperbarui untuk Upload Drive) ---
+
+        async function submitOrder(orderDetails) {
+             const selectedPaymentMethod = orderDetails.paymentMethod;
+             let proofUrl = 'N/A';
+             
+             // 1. Proses Upload Bukti Pembayaran jika diperlukan
+             if (['QRIS', 'BSI'].includes(selectedPaymentMethod)) {
+                 if (paymentProofFile.files.length === 0) {
+                     showModal('Bukti Pembayaran Diperlukan', 'Harap unggah file bukti pembayaran Anda.', false);
+                     return;
+                 }
+                 try {
+                     proofUrl = await uploadProofImage();
+                 } catch (e) {
+                     onFailure(e);
+                     return; // Hentikan proses jika upload gagal
+                 }
+             }
+
+             // 2. Kirim Pesanan ke Apps Script
+             orderDetails.paymentProofUrl = proofUrl; // Tambahkan URL bukti pembayaran
+
+             fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec", {
+                 method: "POST",
+                 body: JSON.stringify({
+                     action: "processOrder",
+                     data: orderDetails
+                 }),
+                 headers: {
+                     "Content-Type": "text/plain;charset=utf-8"
+                 },
+                 redirect: "follow"
+             })
+             .then(response => {
+                 if (!response.ok) throw new Error('Network response was not ok');
+                 return response.json();
+             })
+             .then(response => onSuccess(response, orderDetails))
+             .catch(error => onFailure(error));
+        }
+
+        function onSuccess(response, orderDetails) {
+            const orderNumber = response.orderNumber;
+            
+            submitText.classList.remove('hidden');
+            submitLoader.classList.add('hidden');
+            placeOrderButton.disabled = false;
+            
+            const message = `Terima kasih! Pesanan Anda telah berhasil dibuat. Nomor Pesanan: <strong>#${orderNumber}</strong>. Mohon cek WhatsApp untuk informasi pelacakan lebih lanjut.`;
+            showModal("Pemesanan Berhasil", message, true, orderNumber);
+            
+            const waMessage = generateWhatsAppMessage({ ...orderDetails, orderNumber: orderNumber, status: 'Menunggu Konfirmasi' });
+            const adminPhoneNumber = '6285793715450'; // Ganti dengan nomor WhatsApp admin toko
+            whatsappButton.href = `https://wa.me/${adminPhoneNumber}?text=${waMessage}`;
+            whatsappButton.classList.remove('hidden');
+            
+            // Reset state
+            checkoutForm.reset();
+            localStorage.removeItem('cart');
+            cart = {};
+            renderCart();
+            renderProducts(products); 
+            checkoutSidebar.classList.add('translate-x-full');
+            
+            // Reset tampilan pembayaran dan upload
+            qrisContainer.classList.add('hidden');
+            bsiContainer.classList.add('hidden');
+            paymentDetailsContainer.classList.add('hidden');
+            uploadProofContainer.classList.add('hidden');
+            uploadStatusEl.classList.add('hidden');
+            paymentProofFile.value = '';
+        }
+
+        function onFailure(error) {
+            submitText.classList.remove('hidden');
+            submitLoader.classList.add('hidden');
+            placeOrderButton.disabled = false;
+            console.error("Error:", error);
+            showModal("Terjadi Kesalahan", `Terjadi kesalahan saat memproses pesanan Anda. Coba lagi atau hubungi admin.`, false);
+        }
+
+        // --- LISTENERS ---
+
+        // Varian Modal Listeners
+        closeVariantModalButton.addEventListener('click', () => { variantModal.classList.add('hidden'); });
+
+        addVariantToCartButton.addEventListener('click', () => {
+            const selectedRadio = document.querySelector('input[name="selectedVariant"]:checked');
+            if (selectedRadio) {
+                const variantName = selectedRadio.value;
+                updateCartItem(selectedVariantId, variantName);
+                variantModal.classList.add('hidden');
+            }
+        });
+
+        // Checkout & Payment Listeners
+        checkoutForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            submitText.classList.add('hidden');
+            submitLoader.classList.remove('hidden');
+            placeOrderButton.disabled = true;
+
+            const orderDetails = {
+                customerName: document.getElementById('customerName').value,
+                customerNumber: document.getElementById('customerNumber').value,
+                customerAddress: document.getElementById('customerAddress').value,
+                paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD',
+                items: Object.values(cart)
+            };
+
+            submitOrder(orderDetails);
+        });
+
+        paymentMethodRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const method = e.target.value;
+                
+                paymentDetailsContainer.classList.add('hidden');
+                qrisContainer.classList.add('hidden');
+                bsiContainer.classList.add('hidden');
+                uploadProofContainer.classList.add('hidden');
+                
+                // Reset file input dan status
+                paymentProofFile.value = '';
+                uploadStatusEl.classList.add('hidden');
+
+                if (method === "QRIS") {
+                    qrisImageCheckout.src = qrisUrl;
+                    qrisContainer.classList.remove('hidden');
+                    paymentDetailsContainer.classList.remove('hidden');
+                    uploadProofContainer.classList.remove('hidden');
+                } else if (method === "BSI") {
+                    bsiContainer.classList.remove('hidden');
+                    paymentDetailsContainer.classList.remove('hidden');
+                    uploadProofContainer.classList.remove('hidden');
+                }
+            });
+        });
+        
+        // ... [Listener lainnya seperti cartIcon, closeCart, checkoutButton, closeCheckoutButton, modalClose] ...
+
+        cartIconButton.addEventListener('click', () => { cartSidebar.classList.remove('translate-x-full'); });
+        closeCartButton.addEventListener('click', () => { cartSidebar.classList.add('translate-x-full'); });
+        checkoutButton.addEventListener('click', () => {
+            cartSidebar.classList.add('translate-x-full');
+            checkoutSidebar.classList.remove('translate-x-full');
+            renderOrderSummary();
+        });
+        closeCheckoutButton.addEventListener('click', () => {
+            checkoutSidebar.classList.add('translate-x-full');
+            cartSidebar.classList.remove('translate-x-full');
+        });
+        modalClose.addEventListener('click', hideModal);
+
+        // --- UTILITIES (renderOrderSummary, showModal, generateWhatsAppMessage) ---
         
         function renderOrderSummary() {
             orderItemsList.innerHTML = '';
@@ -481,7 +764,7 @@
             modalMessage.innerHTML = message;
             
             if (isSuccess && orderNumber) {
-                const trackingLink = `StatusPesanan.html?kode=${orderNumber}`; // Ganti dengan halaman pelacakan Anda
+                const trackingLink = `StatusPesanan.html?kode=${orderNumber}`;
                 modalLink.href = trackingLink;
                 modalLink.classList.remove('hidden');
             } else {
@@ -522,146 +805,9 @@ ${trackingLink}`;
 
             return encodeURIComponent(message);
         }
-
-        function onSuccess(response) {
-            const orderNumber = response.orderNumber;
-            const orderDetails = {
-                orderNumber: orderNumber,
-                date: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-                customerName: document.getElementById('customerName').value,
-                customerNumber: document.getElementById('customerNumber').value,
-                customerAddress: document.getElementById('customerAddress').value,
-                paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD',
-                paymentProofUrl: paymentProofInput.value || 'N/A',
-                items: Object.values(cart),
-                status: 'Menunggu Konfirmasi'
-            };
-
-            submitText.classList.remove('hidden');
-            submitLoader.classList.add('hidden');
-            placeOrderButton.disabled = false;
-            
-            const message = `Terima kasih! Pesanan Anda telah berhasil dibuat. Nomor Pesanan: <strong>#${orderNumber}</strong>. Mohon cek WhatsApp untuk informasi pelacakan lebih lanjut.`;
-            showModal("Pemesanan Berhasil", message, true, orderNumber);
-            
-            const waMessage = generateWhatsAppMessage(orderDetails);
-            const adminPhoneNumber = '6285793715450'; // Ganti dengan nomor WhatsApp admin toko
-            whatsappButton.href = `https://wa.me/${adminPhoneNumber}?text=${waMessage}`;
-            whatsappButton.classList.remove('hidden');
-            
-            // Reset state
-            checkoutForm.reset();
-            localStorage.removeItem('cart');
-            cart = {};
-            renderCart();
-            renderProducts(products); 
-            checkoutSidebar.classList.add('translate-x-full');
-            
-            // Reset tampilan pembayaran
-            qrisContainer.classList.add('hidden');
-            bsiContainer.classList.add('hidden');
-            paymentDetailsContainer.classList.add('hidden');
-            uploadProofContainer.classList.add('hidden');
-            paymentProofInput.value = '';
-            paymentProofInput.removeAttribute('required');
-        }
-
-        function onFailure(error) {
-            submitText.classList.remove('hidden');
-            submitLoader.classList.add('hidden');
-            placeOrderButton.disabled = false;
-            console.error("Error:", error);
-            showModal("Terjadi Kesalahan", `Terjadi kesalahan saat memproses pesanan Anda. Coba lagi atau hubungi admin.`, false);
-        }
         
-        // EVENT LISTENERS
-        cartIconButton.addEventListener('click', () => { cartSidebar.classList.remove('translate-x-full'); });
-        closeCartButton.addEventListener('click', () => { cartSidebar.classList.add('translate-x-full'); });
-        checkoutButton.addEventListener('click', () => {
-            cartSidebar.classList.add('translate-x-full');
-            checkoutSidebar.classList.remove('translate-x-full');
-            renderOrderSummary();
-        });
-        closeCheckoutButton.addEventListener('click', () => {
-            checkoutSidebar.classList.add('translate-x-full');
-            // Buka kembali cart sidebar
-            cartSidebar.classList.remove('translate-x-full');
-        });
+        // --- INITIALIZATION ---
 
-        checkoutForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-            // Validasi bukti pembayaran (jika diperlukan)
-            if (['QRIS', 'BSI'].includes(selectedPaymentMethod) && paymentProofInput.hasAttribute('required') && !paymentProofInput.value) {
-                showModal('Bukti Pembayaran Diperlukan', 'Harap unggah bukti pembayaran (URL Gambar) Anda sebelum menyelesaikan pesanan.', false);
-                return;
-            }
-
-            submitText.classList.add('hidden');
-            submitLoader.classList.remove('hidden');
-            placeOrderButton.disabled = true;
-
-            const orderDetails = {
-                customerName: document.getElementById('customerName').value,
-                customerNumber: document.getElementById('customerNumber').value,
-                customerAddress: document.getElementById('customerAddress').value,
-                paymentMethod: selectedPaymentMethod || 'COD',
-                paymentProofUrl: paymentProofInput.value || 'N/A', // Set to N/A if not required/empty
-                items: Object.values(cart)
-            };
-
-            fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec", {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "processOrder",
-                    data: orderDetails
-                }),
-                headers: {
-                    "Content-Type": "text/plain;charset=utf-8"
-                },
-                redirect: "follow"
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(response => onSuccess(response))
-            .catch(error => onFailure(error));
-        });
-
-        paymentMethodRadios.forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                const method = e.target.value;
-                
-                // Sembunyikan semua default
-                paymentDetailsContainer.classList.add('hidden');
-                qrisContainer.classList.add('hidden');
-                bsiContainer.classList.add('hidden');
-                uploadProofContainer.classList.add('hidden');
-                paymentProofInput.removeAttribute('required');
-                paymentProofInput.value = '';
-
-                if (method === "QRIS") {
-                    qrisImageCheckout.src = qrisUrl;
-                    qrisContainer.classList.remove('hidden');
-                    paymentDetailsContainer.classList.remove('hidden');
-                    uploadProofContainer.classList.remove('hidden');
-                    paymentProofInput.setAttribute('required', 'required');
-                } else if (method === "BSI") {
-                    bsiContainer.classList.remove('hidden');
-                    paymentDetailsContainer.classList.remove('hidden');
-                    uploadProofContainer.classList.remove('hidden');
-                    paymentProofInput.setAttribute('required', 'required');
-                } else if (method === "COD") {
-                    // COD: Semua tetap tersembunyi
-                }
-            });
-        });
-
-        modalClose.addEventListener('click', hideModal);
-        
-        // INITIALIZATION
         document.addEventListener('DOMContentLoaded', () => {
             fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec")
             .then(response => {
