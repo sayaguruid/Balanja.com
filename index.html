@@ -227,9 +227,17 @@
         const paymentProofInput = document.getElementById('paymentProof');
 
 
+        /**
+         * Mengambil detail produk/varian berdasarkan ID produk dan nama varian.
+         * @param {number} id ID produk utama.
+         * @param {string} [variantName=null] Nama varian (jika ada).
+         * @returns {object|null} Objek produk dengan detail spesifik varian, atau produk utama.
+         */
         function getProduct(id, variantName = null) {
             const product = products.find(p => p.id === id);
-            if (product && variantName && product.variants) {
+            if (!product) return null;
+
+            if (variantName && product.variants && product.variants.length > 0) {
                 const variant = product.variants.find(v => v.name === variantName);
                 if (variant) {
                     return {
@@ -241,14 +249,19 @@
                     };
                 }
             }
-            // Jika tidak ada varian atau varian tidak ditemukan, kembali ke produk utama (diasumsikan tanpa varian)
+            // Jika tidak ada varian atau produk non-varian
             return {
                 ...product,
                 uniqueId: id,
-                stock: product.stock // Stock Produk utama (diasumsikan)
+                stock: product.stock // Stock Produk utama
             };
         }
 
+        /**
+         * Menambah kuantitas item ke keranjang atau menambahkan item baru.
+         * @param {number} productId ID produk utama.
+         * @param {string} [variantName=null] Nama varian (jika ada).
+         */
         function updateCartItem(productId, variantName = null) {
             const product = getProduct(productId, variantName);
             if (!product) return;
@@ -269,11 +282,15 @@
                     showModal('Stok Habis', `Stok untuk produk "${product.name}${product.variantName ? ' (' + product.variantName + ')' : ''}" saat ini kosong.`, false);
                 }
             }
-            renderProducts(products); // Render ulang untuk update stok
+            renderProducts(products); // Render ulang untuk update stok di daftar produk
             renderCart();
             saveCart();
         }
 
+        /**
+         * Mengurangi kuantitas item di keranjang.
+         * @param {string|number} uniqueId ID unik produk di keranjang.
+         */
         function decrementQuantity(uniqueId) {
             if (cart[uniqueId]) {
                 cart[uniqueId].quantity--;
@@ -281,11 +298,15 @@
                     delete cart[uniqueId];
                 }
             }
-            renderProducts(products); // Render ulang untuk update stok
+            renderProducts(products); // Render ulang untuk update stok di daftar produk
             renderCart();
             saveCart();
         }
 
+        /**
+         * Merender daftar produk (dengan dukungan varian).
+         * @param {Array<object>} productsData Daftar produk dari server.
+         */
         function renderProducts(productsData) {
             products = productsData;
             productsList.innerHTML = '';
@@ -294,15 +315,16 @@
                 productsList.innerHTML = `<p class="text-center text-gray-400">Tidak ada produk yang tersedia.</p>`;
             } else {
                 products.forEach(product => {
-                    // Check if the product has variants
                     if (product.variants && product.variants.length > 0) {
                         product.variants.forEach(variant => {
                             const variantProduct = getProduct(product.id, variant.name);
-                            const productCard = createProductCard(variantProduct);
-                            productsList.appendChild(productCard);
+                            if (variantProduct) {
+                                const productCard = createProductCard(variantProduct);
+                                productsList.appendChild(productCard);
+                            }
                         });
-                    } else {
-                        // Product without variants
+                    } else if (product.stock > 0 || product.stock === 0) {
+                        // Produk tanpa varian, pastikan stok terdeteksi
                         const baseProduct = getProduct(product.id);
                         const productCard = createProductCard(baseProduct);
                         productsList.appendChild(productCard);
@@ -321,19 +343,29 @@
             });
         }
         
+        /**
+         * Membuat elemen kartu produk HTML.
+         * @param {object} product Objek produk/varian.
+         * @returns {HTMLElement} Elemen div kartu produk.
+         */
         function createProductCard(product) {
             const productCard = document.createElement('div');
-            productCard.className = 'product-card flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100';
-            const isOutOfStock = product.stock <= 0;
+            // Cek ketersediaan stok aktual (dikurangi yang ada di keranjang)
+            const quantityInCart = cart[product.uniqueId]?.quantity || 0;
+            const availableStock = product.stock - quantityInCart;
+
+            const isOutOfStock = availableStock <= 0;
             const buttonText = isOutOfStock ? 'Stok Habis' : '+';
             const buttonClass = isOutOfStock ? 'bg-red-400 text-white cursor-not-allowed' : 'bg-gray-800 text-white hover:bg-gray-900';
+            
+            productCard.className = 'product-card flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100';
             
             productCard.innerHTML = `
                 ${product.imageLink ? `<img src="${product.imageLink}" alt="${product.name}" class="w-16 h-16 object-cover rounded-lg mr-4" loading="lazy">` : ''}
                 <div class="flex-1">
                     <h3 class="font-semibold text-gray-800">${product.name} ${product.variantName ? `<span class="text-sm text-gray-500">(${product.variantName})</span>` : ''}</h3>
                     <p class="text-lg font-bold text-gray-600">${currencyFormatter.format(product.price)}</p>
-                    <p class="text-xs text-gray-500 mt-1">Stok: <span class="${isOutOfStock ? 'text-red-500 font-bold' : 'text-green-500 font-bold'}">${product.stock}</span></p>
+                    <p class="text-xs text-gray-500 mt-1">Stok: <span class="${isOutOfStock ? 'text-red-500 font-bold' : 'text-green-500 font-bold'}">${availableStock}</span></p>
                 </div>
                 <button data-id="${product.id}" data-variant="${product.variantName || ''}" class="add-to-cart font-bold w-10 h-10 rounded-full flex items-center justify-center transition duration-300 ${buttonClass}" ${isOutOfStock ? 'disabled' : ''}>
                     ${buttonText}
@@ -355,21 +387,23 @@
                 checkoutButton.disabled = false;
                 cartCountEl.classList.remove('hidden');
                 cartItems.forEach(item => {
+                    const availableStock = item.stock - item.quantity;
+                    const incrementDisabled = availableStock <= 0;
+                    const incrementClass = incrementDisabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200';
+                    
                     const itemEl = document.createElement('div');
                     itemEl.className = 'cart-item flex items-center justify-between p-3 bg-gray-50 rounded-lg shadow-sm';
-                    const incrementDisabled = item.quantity >= item.stock;
-                    const incrementClass = incrementDisabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200';
                     
                     itemEl.innerHTML = `
                         <div class="flex-1 pr-2">
                             <h4 class="font-medium text-gray-800">${item.name} ${item.variantName ? `<span class="text-xs text-gray-500">(${item.variantName})</span>` : ''}</h4>
                             <p class="text-sm text-gray-500">${currencyFormatter.format(item.price)}</p>
-                            <p class="text-xs text-gray-400">Stok sisa: ${item.stock - item.quantity}</p>
+                            <p class="text-xs text-gray-400">Stok sisa: <span class="${availableStock <= 0 ? 'text-red-500' : ''}">${availableStock}</span></p>
                         </div>
                         <div class="flex items-center space-x-2">
                             <button data-id="${item.uniqueId}" class="decrement-quantity text-gray-500 hover:text-gray-700 font-bold p-1 rounded-full hover:bg-gray-200 transition">&ndash;</button>
                             <span class="text-lg font-bold w-6 text-center text-gray-800">${item.quantity}</span>
-                            <button data-id="${item.id}" data-variant="${item.variantName || ''}" data-unique-id="${item.uniqueId}" class="increment-quantity font-bold p-1 rounded-full transition ${incrementClass}" ${incrementDisabled ? 'disabled' : ''}>+</button>
+                            <button data-id="${item.id}" data-variant="${item.variantName || ''}" class="increment-quantity font-bold p-1 rounded-full transition ${incrementClass}" ${incrementDisabled ? 'disabled' : ''}>+</button>
                         </div>
                     `;
                     cartItemsList.appendChild(itemEl);
@@ -399,6 +433,7 @@
         }
 
         function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
+        
         function loadCart() {
             try {
                 const savedCart = localStorage.getItem('cart');
@@ -406,12 +441,10 @@
                     const parsedCart = JSON.parse(savedCart);
                     cart = Object.fromEntries(
                         Object.entries(parsedCart).filter(([uniqueId, item]) => {
-                            // Re-validate against current product list (especially stock)
                             const productId = item.id;
                             const variantName = item.variantName;
                             const product = getProduct(productId, variantName);
                             
-                            // Only include if product exists and stock is available
                             if (product && product.stock > 0) {
                                 // Update price/stock from server data in case it changed
                                 item.price = product.price;
@@ -481,7 +514,7 @@
             const items = orderDetails.items.map(item => `• ${item.name}${item.variantName ? ' (' + item.variantName + ')' : ''} x${item.quantity}`).join('\n');
             const totalPrice = currencyFormatter.format(orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0));
             const status = orderDetails.status || 'Menunggu Konfirmasi';
-            const paymentProof = orderDetails.paymentProofUrl ? `\nBukti Transfer: ${orderDetails.paymentProofUrl}` : '';
+            const paymentProof = orderDetails.paymentProofUrl && orderDetails.paymentProofUrl !== 'N/A' ? `\nBukti Transfer: ${orderDetails.paymentProofUrl}` : '';
 
             const currentDomain = window.location.origin;
             const trackingLink = `${currentDomain}/StatusPesanan.html?kode=${orderDetails.orderNumber}`;
@@ -514,7 +547,7 @@ ${trackingLink}`;
                 customerNumber: document.getElementById('customerNumber').value,
                 customerAddress: document.getElementById('customerAddress').value,
                 paymentMethod: document.querySelector('input[name="paymentMethod"]:checked')?.value || 'COD',
-                paymentProofUrl: paymentProofInput.value || 'N/A', // NEW
+                paymentProofUrl: paymentProofInput.value || 'N/A',
                 items: Object.values(cart),
                 status: 'Menunggu Konfirmasi'
             };
@@ -537,6 +570,13 @@ ${trackingLink}`;
             renderCart();
             renderProducts(products); // Rerender products list to reflect reduced stock
             checkoutSidebar.classList.add('translate-x-full');
+            // Reset tampilan pembayaran
+            qrisContainer.classList.add('hidden');
+            bsiContainer.classList.add('hidden');
+            paymentDetailsContainer.classList.add('hidden');
+            uploadProofContainer.classList.add('hidden');
+            paymentProofInput.value = '';
+            paymentProofInput.removeAttribute('required');
         }
 
         function onFailure(error) {
@@ -564,8 +604,9 @@ ${trackingLink}`;
             e.preventDefault();
             
             const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+            // Validasi bukti pembayaran (jika diperlukan)
             if (['QRIS', 'BSI'].includes(selectedPaymentMethod) && !paymentProofInput.value) {
-                showModal('Bukti Pembayaran Diperlukan', 'Harap unggah bukti pembayaran Anda sebelum menyelesaikan pesanan.', false);
+                showModal('Bukti Pembayaran Diperlukan', 'Harap unggah bukti pembayaran (URL Gambar) Anda sebelum menyelesaikan pesanan.', false);
                 return;
             }
 
@@ -578,7 +619,7 @@ ${trackingLink}`;
                 customerNumber: document.getElementById('customerNumber').value,
                 customerAddress: document.getElementById('customerAddress').value,
                 paymentMethod: selectedPaymentMethod || 'COD',
-                paymentProofUrl: paymentProofInput.value || '', // NEW FIELD
+                paymentProofUrl: paymentProofInput.value || '',
                 items: Object.values(cart)
             };
 
@@ -604,26 +645,28 @@ ${trackingLink}`;
         paymentMethodRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
                 const method = e.target.value;
+                
+                // Sembunyikan semua default
                 paymentDetailsContainer.classList.add('hidden');
                 qrisContainer.classList.add('hidden');
                 bsiContainer.classList.add('hidden');
                 uploadProofContainer.classList.add('hidden');
-                paymentProofInput.removeAttribute('required'); // Default: not required
+                paymentProofInput.removeAttribute('required');
+                paymentProofInput.value = ''; // Kosongkan input bukti pembayaran
 
                 if (method === "QRIS") {
                     qrisImageCheckout.src = qrisUrl;
                     qrisContainer.classList.remove('hidden');
                     paymentDetailsContainer.classList.remove('hidden');
                     uploadProofContainer.classList.remove('hidden');
-                    paymentProofInput.setAttribute('required', 'required'); // Required for QRIS
+                    paymentProofInput.setAttribute('required', 'required');
                 } else if (method === "BSI") {
                     bsiContainer.classList.remove('hidden');
                     paymentDetailsContainer.classList.remove('hidden');
                     uploadProofContainer.classList.remove('hidden');
-                    paymentProofInput.setAttribute('required', 'required'); // Required for BSI
+                    paymentProofInput.setAttribute('required', 'required');
                 } else if (method === "COD") {
-                    // COD: Payment details and proof upload are hidden
-                    paymentProofInput.value = ''; // Clear proof input for COD
+                    // COD: Semua tetap tersembunyi, tidak perlu bukti transfer
                 }
             });
         });
@@ -640,15 +683,15 @@ ${trackingLink}`;
             .then(data => {
                 products = data.products.map(p => ({ 
                     ...p, 
-                    id: parseInt(p.id) // Ensure ID is parsed as integer
+                    id: parseInt(p.id) // Pastikan ID di-parse sebagai integer
                 }));
                 qrisUrl = data.qrisUrl;
-                loadCart(); // Load cart AFTER products are fetched
+                loadCart(); // Muat keranjang setelah produk didapatkan
                 renderProducts(products);
                 renderCart();
             })
             .catch(error => {
-                loadingMessage.innerHTML = `<p class="text-red-600">Gagal memuat produk. Periksa koneksi atau URL Apps Script.</p>`;
+                loadingMessage.innerHTML = `<p class="text-red-600">Gagal memuat produk. Pastikan URL Apps Script sudah benar dan dideploy dengan benar.</p>`;
                 productsList.classList.remove('hidden');
                 loadingMessage.classList.remove('hidden');
                 console.error("Error fetching products:", error);
