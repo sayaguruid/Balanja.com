@@ -3,28 +3,29 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Balanja.com</title>
-    <style>
-        /* CSS yang sangat penting dari Tailwind, misal: body, header, max-w-xl */
-        body { font-family: 'Inter', sans-serif; }
-        .product-card, .cart-item { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
-        .product-card:hover { transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        .loader { border: 4px solid #e5e7eb; border-top: 4px solid #4f46e5; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @media (max-width: 768px) { .checkout-sidebar { width: 100%; } }
-        @media (min-width: 769px) { .checkout-sidebar { width: 40%; } }
-        
-        /* Tambahkan CSS untuk skeletal loader */
-        .skeleton { animation: pulse 1.5s infinite ease-in-out; background: #f3f4f6; border-radius: 8px; }
-        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 0.5; } 100% { opacity: 0.8; } }
-    </style>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
-
-    <link rel="stylesheet" href="https://cdn.tailwindcss.com" media="print" onload="this.media='all'">
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    </head>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Transisi halus saat hover pada kartu */
+        .product-card, .cart-item { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
+        .product-card:hover { transform: translateY(-3px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        /* Loader standar */
+        .loader { border: 4px solid #e5e7eb; border-top: 4px solid #4f46e5; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Skeleton Loader */
+        .skeleton { animation: pulse 1.5s infinite ease-in-out; background: #f3f4f6; border-radius: 8px; }
+        @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 0.5; } 100% { opacity: 0.8; } }
+        /* Responsif Sidebar Checkout */
+        .checkout-sidebar { width: 100%; max-width: 450px; }
+        @media (min-width: 768px) { .checkout-sidebar { width: 450px; } }
+    </style>
+    
+</head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
     <main class="flex-1 p-4 md:p-8">
         <header class="flex flex-col items-center mb-6 text-center">
@@ -33,16 +34,8 @@
         </header>
 
         <div class="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Produk</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Daftar Produk</h2>
             <div id="loading-message" class="space-y-4 mt-4">
-                <div class="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div class="w-16 h-16 mr-4 skeleton"></div>
-                    <div class="flex-1 space-y-2">
-                        <div class="h-4 w-3/4 skeleton"></div>
-                        <div class="h-6 w-1/2 skeleton"></div>
-                    </div>
-                    <div class="w-8 h-8 rounded-full skeleton"></div>
-                </div>
                 <div class="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100">
                     <div class="w-16 h-16 mr-4 skeleton"></div>
                     <div class="flex-1 space-y-2">
@@ -66,7 +59,7 @@
         </button>
     </div>
 
-    <div id="cart-sidebar" class="fixed top-0 right-0 w-full md:w-80 h-full bg-white shadow-xl transform translate-x-full transition-transform ease-in-out duration-300 p-6 flex flex-col z-50">
+    <div id="cart-sidebar" class="fixed top-0 right-0 w-full max-w-sm md:w-96 h-full bg-white shadow-2xl transform translate-x-full transition-transform ease-in-out duration-300 p-6 flex flex-col z-50">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-2xl font-bold text-gray-800">Keranjang</h3>
             <button id="close-cart" class="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition">
@@ -87,8 +80,8 @@
         </div>
     </div>
 
-    <div id="checkout-sidebar" class="checkout-sidebar fixed top-0 right-0 h-full bg-white shadow-xl transform translate-x-full transition-transform ease-in-out duration-300 p-6 flex flex-col z-50 overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
+    <div id="checkout-sidebar" class="checkout-sidebar fixed top-0 right-0 h-full bg-white shadow-2xl transform translate-x-full transition-transform ease-in-out duration-300 p-6 flex flex-col z-50 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-white pt-0 pb-4 z-10 border-b border-gray-100">
             <h3 class="text-2xl font-bold text-gray-800">Selesaikan Pesanan</h3>
             <button id="close-checkout" class="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -154,7 +147,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-6 pt-4 border-t border-gray-200">
+            <div class="mt-6 pt-4 border-t border-gray-200 sticky bottom-0 bg-white">
                 <div class="flex justify-between items-center mb-4">
                     <span class="text-lg font-bold text-gray-800">Total:</span>
                     <span id="order-total" class="text-2xl font-extrabold text-gray-800">Rp 0</span>
@@ -167,13 +160,13 @@
         </form>
     </div>
 
-    <div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 hidden">
+    <div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 hidden z-[60]">
         <div class="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center">
             <h3 id="modal-title" class="text-xl font-bold mb-4"></h3>
             <p id="modal-message" class="text-gray-700 mb-6"></p>
             <a id="modal-link" href="#" target="_blank" class="hidden text-indigo-600 underline hover:text-indigo-800 font-medium mb-6">Lihat Status Pesanan</a>
             <a id="whatsapp-button" href="#" target="_blank" class="hidden bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 transition inline-flex items-center justify-center">
-                <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.039 2.016c-5.523 0-10.007 4.484-10.007 10.007 0 1.76.467 3.42 1.3 4.87l-.934 3.407 3.498-.918c1.39.757 2.97 1.157 4.643 1.157 5.523 0 10.007-4.484 10.007-10.007 0-5.523-4.484-10.007-10.007-10.007zM18.8 16.924c-.45-.224-2.65-.968-3.064-1.114-.41-.146-.708-.216-1.006.216-.296.432-1.162 1.114-1.424 1.412-.262.296-.52.332-.968.112-1.22-.614-2.696-1.666-3.794-3.486-.296-.46-.318-.84-.1-.13-.23-.178.2-.18.428-.426.224-.224.288-.588.396-.75.108-.162.13-.306.196-.426.064-.12.032-.22-.016-.404-.048-.186-.44-.962-.604-1.312-.164-.348-.33-.296-.474-.296-.144 0-.306-.022-.472-.022-.166 0-.44.022-.676.332-.236.312-.906.888-.906 2.164 0 1.274.922 2.508 1.054 2.68.132.17.262.332.51.526.248.196.502.268.868.22.422-.054.45-.162 1.32-.544.87-.384 2.18-.846 3.16-1.208 1.054-.388 1.834-1.144 2.18-1.748.348-.602.404-.984.348-1.096-.056-.112-.152-.156-.302-.23-.15-.072-.326-.142-.516-.216z"></path></svg>
+                <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.039 2.016c-5.523 0-10.007 4.484-10.007 10.007 0 1.76.467 3.42 1.3 4.87l-.934 3.407 3.498-.918c1.39.757 2.97 1.157 4.643 1.157 5.523 0 10.007-4.484 10.007-10.007 0-5.523-4.484-10.007-10.007-10.007zM18.8 16.924c-.45-.224-2.65-.968-3.064-1.114-.41-.146-.708-.216-1.006.216-.296.432-1.162 1.114-1.424 1.412-.262.296-.52.332-.968.112-1.22-.614-2.696-1.666-3.794-3.486-.296-.46-.318-.84-.1-.13-.23-.178.2-.18.428-.426.224-.224.288-.588.396-.75.108-.162.13-.306.196-.426.064-.12.032-.22-.016-.404-.048-.186-.44-.962-.604-1.312-.164-.348-.33-.296-.474-.296-.144 0-.306-.022-.472-.022-.166 0-.44.022-.676.332-.236.312-.906.888-.906 2.164 0 1.274.922 2.508 1.054 2.68.132.17.262.332.51.526.248.196.502.268.868.22.422-.054.45-.162 1.32-.544.87-.384 2.18-.846 3.16-1.208 1.054-.388 1.834-1.144 2.18-1.748.348-.602.404-.984.348-1.096-.056-.112-.152-.156-.302-.23-.15-.072-.326-.142-.516-.216z"/></svg>
                 Hubungi Admin
             </a>
             <button id="modal-close" class="bg-gray-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-900 transition mt-4">Tutup</button>
@@ -187,6 +180,7 @@
     <script src="https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec" defer></script>
 
     <script>
+        // INISIALISASI VARIABEL SAMA SEPERTI SEBELUMNYA
         let products = [];
         let qrisUrl = "";
         let cart = {};
@@ -218,8 +212,6 @@
         const modalClose = document.getElementById('modal-close');
         const qrisImageCheckout = document.getElementById('qris-image-checkout');
         const whatsappButton = document.getElementById('whatsapp-button');
-        
-        // NEW ELEMENTS
         const paymentDetailsContainer = document.getElementById('payment-details-container');
         const qrisContainer = document.getElementById('qris-container');
         const bsiContainer = document.getElementById('bsi-container');
@@ -227,11 +219,10 @@
         const paymentProofInput = document.getElementById('paymentProof');
 
 
+        // FUNGSI-FUNGSI UTAMA (TIDAK BERUBAH DARI VERSI SEBELUMNYA)
+
         /**
-         * Mengambil detail produk/varian berdasarkan ID produk dan nama varian.
-         * @param {number} id ID produk utama.
-         * @param {string} [variantName=null] Nama varian (jika ada).
-         * @returns {object|null} Objek produk dengan detail spesifik varian, atau produk utama.
+         * Mengambil detail produk/varian.
          */
         function getProduct(id, variantName = null) {
             const product = products.find(p => p.id === id);
@@ -244,23 +235,20 @@
                         ...product,
                         variantName: variant.name,
                         price: variant.price,
-                        stock: variant.stock, // Stock per Varian
-                        uniqueId: `${id}-${variant.name}` // Unique ID gabungan untuk Keranjang
+                        stock: variant.stock,
+                        uniqueId: `${id}-${variant.name}`
                     };
                 }
             }
-            // Jika tidak ada varian atau produk non-varian
             return {
                 ...product,
                 uniqueId: id,
-                stock: product.stock // Stock Produk utama
+                stock: product.stock
             };
         }
 
         /**
-         * Menambah kuantitas item ke keranjang atau menambahkan item baru.
-         * @param {number} productId ID produk utama.
-         * @param {string} [variantName=null] Nama varian (jika ada).
+         * Menambah kuantitas item ke keranjang.
          */
         function updateCartItem(productId, variantName = null) {
             const product = getProduct(productId, variantName);
@@ -282,14 +270,13 @@
                     showModal('Stok Habis', `Stok untuk produk "${product.name}${product.variantName ? ' (' + product.variantName + ')' : ''}" saat ini kosong.`, false);
                 }
             }
-            renderProducts(products); // Render ulang untuk update stok di daftar produk
+            renderProducts(products);
             renderCart();
             saveCart();
         }
 
         /**
          * Mengurangi kuantitas item di keranjang.
-         * @param {string|number} uniqueId ID unik produk di keranjang.
          */
         function decrementQuantity(uniqueId) {
             if (cart[uniqueId]) {
@@ -298,14 +285,13 @@
                     delete cart[uniqueId];
                 }
             }
-            renderProducts(products); // Render ulang untuk update stok di daftar produk
+            renderProducts(products);
             renderCart();
             saveCart();
         }
 
         /**
-         * Merender daftar produk (dengan dukungan varian).
-         * @param {Array<object>} productsData Daftar produk dari server.
+         * Merender daftar produk (membuat kartu produk).
          */
         function renderProducts(productsData) {
             products = productsData;
@@ -323,8 +309,7 @@
                                 productsList.appendChild(productCard);
                             }
                         });
-                    } else if (product.stock > 0 || product.stock === 0) {
-                        // Produk tanpa varian, pastikan stok terdeteksi
+                    } else if (product.stock >= 0) { // Termasuk stok 0
                         const baseProduct = getProduct(product.id);
                         const productCard = createProductCard(baseProduct);
                         productsList.appendChild(productCard);
@@ -345,12 +330,9 @@
         
         /**
          * Membuat elemen kartu produk HTML.
-         * @param {object} product Objek produk/varian.
-         * @returns {HTMLElement} Elemen div kartu produk.
          */
         function createProductCard(product) {
             const productCard = document.createElement('div');
-            // Cek ketersediaan stok aktual (dikurangi yang ada di keranjang)
             const quantityInCart = cart[product.uniqueId]?.quantity || 0;
             const availableStock = product.stock - quantityInCart;
 
@@ -358,7 +340,7 @@
             const buttonText = isOutOfStock ? 'Stok Habis' : '+';
             const buttonClass = isOutOfStock ? 'bg-red-400 text-white cursor-not-allowed' : 'bg-gray-800 text-white hover:bg-gray-900';
             
-            productCard.className = 'product-card flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100';
+            productCard.className = 'product-card flex items-center p-4 bg-white rounded-xl shadow-md border border-gray-100';
             
             productCard.innerHTML = `
                 ${product.imageLink ? `<img src="${product.imageLink}" alt="${product.name}" class="w-16 h-16 object-cover rounded-lg mr-4" loading="lazy">` : ''}
@@ -374,6 +356,9 @@
             return productCard;
         }
 
+        /**
+         * Merender keranjang di sidebar.
+         */
         function renderCart() {
             cartItemsList.innerHTML = '';
             const cartItems = Object.values(cart);
@@ -413,11 +398,13 @@
             updateCartCount();
             
             document.querySelectorAll('.decrement-quantity').forEach(button => button.addEventListener('click', (e) => decrementQuantity(e.target.dataset.id)));
-            document.querySelectorAll('.increment-quantity').forEach(button => button.addEventListener('click', (e) => {
-                const productId = parseInt(e.target.dataset.id);
-                const variantName = e.target.dataset.variant || null;
-                updateCartItem(productId, variantName);
-            }));
+            document.querySelectorAll('.increment-quantity').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.dataset.id);
+                    const variantName = e.target.dataset.variant || null;
+                    updateCartItem(productId, variantName);
+                });
+            });
         }
 
         function calculateTotal() {
@@ -446,10 +433,8 @@
                             const product = getProduct(productId, variantName);
                             
                             if (product && product.stock > 0) {
-                                // Update price/stock from server data in case it changed
                                 item.price = product.price;
                                 item.stock = product.stock;
-                                // Adjust quantity if saved quantity exceeds current stock
                                 if (item.quantity > item.stock) {
                                     item.quantity = item.stock;
                                 }
@@ -496,7 +481,7 @@
             modalMessage.innerHTML = message;
             
             if (isSuccess && orderNumber) {
-                const trackingLink = `StatusPesanan.html?kode=${orderNumber}`;
+                const trackingLink = `StatusPesanan.html?kode=${orderNumber}`; // Ganti dengan halaman pelacakan Anda
                 modalLink.href = trackingLink;
                 modalLink.classList.remove('hidden');
             } else {
@@ -564,12 +549,14 @@ ${trackingLink}`;
             whatsappButton.href = `https://wa.me/${adminPhoneNumber}?text=${waMessage}`;
             whatsappButton.classList.remove('hidden');
             
+            // Reset state
             checkoutForm.reset();
             localStorage.removeItem('cart');
             cart = {};
             renderCart();
-            renderProducts(products); // Rerender products list to reflect reduced stock
+            renderProducts(products); 
             checkoutSidebar.classList.add('translate-x-full');
+            
             // Reset tampilan pembayaran
             qrisContainer.classList.add('hidden');
             bsiContainer.classList.add('hidden');
@@ -597,6 +584,7 @@ ${trackingLink}`;
         });
         closeCheckoutButton.addEventListener('click', () => {
             checkoutSidebar.classList.add('translate-x-full');
+            // Buka kembali cart sidebar
             cartSidebar.classList.remove('translate-x-full');
         });
 
@@ -605,7 +593,7 @@ ${trackingLink}`;
             
             const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
             // Validasi bukti pembayaran (jika diperlukan)
-            if (['QRIS', 'BSI'].includes(selectedPaymentMethod) && !paymentProofInput.value) {
+            if (['QRIS', 'BSI'].includes(selectedPaymentMethod) && paymentProofInput.hasAttribute('required') && !paymentProofInput.value) {
                 showModal('Bukti Pembayaran Diperlukan', 'Harap unggah bukti pembayaran (URL Gambar) Anda sebelum menyelesaikan pesanan.', false);
                 return;
             }
@@ -619,7 +607,7 @@ ${trackingLink}`;
                 customerNumber: document.getElementById('customerNumber').value,
                 customerAddress: document.getElementById('customerAddress').value,
                 paymentMethod: selectedPaymentMethod || 'COD',
-                paymentProofUrl: paymentProofInput.value || '',
+                paymentProofUrl: paymentProofInput.value || 'N/A', // Set to N/A if not required/empty
                 items: Object.values(cart)
             };
 
@@ -652,7 +640,7 @@ ${trackingLink}`;
                 bsiContainer.classList.add('hidden');
                 uploadProofContainer.classList.add('hidden');
                 paymentProofInput.removeAttribute('required');
-                paymentProofInput.value = ''; // Kosongkan input bukti pembayaran
+                paymentProofInput.value = '';
 
                 if (method === "QRIS") {
                     qrisImageCheckout.src = qrisUrl;
@@ -666,7 +654,7 @@ ${trackingLink}`;
                     uploadProofContainer.classList.remove('hidden');
                     paymentProofInput.setAttribute('required', 'required');
                 } else if (method === "COD") {
-                    // COD: Semua tetap tersembunyi, tidak perlu bukti transfer
+                    // COD: Semua tetap tersembunyi
                 }
             });
         });
@@ -683,10 +671,10 @@ ${trackingLink}`;
             .then(data => {
                 products = data.products.map(p => ({ 
                     ...p, 
-                    id: parseInt(p.id) // Pastikan ID di-parse sebagai integer
+                    id: parseInt(p.id)
                 }));
                 qrisUrl = data.qrisUrl;
-                loadCart(); // Muat keranjang setelah produk didapatkan
+                loadCart();
                 renderProducts(products);
                 renderCart();
             })
