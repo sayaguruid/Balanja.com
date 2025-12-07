@@ -60,10 +60,12 @@
             transform: translateX(400px);
             transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             border-left: 4px solid #10b981;
+            opacity: 0;
         }
         
         .notification-item.show {
             transform: translateX(0);
+            opacity: 1;
         }
         
         .notification-avatar {
@@ -146,53 +148,10 @@
         .notification-item.slide-out {
             animation: slideOut 0.5s forwards;
         }
-        
-        /* Badge untuk jumlah pembelian */
-        .purchase-badge {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #ef4444;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-        }
-        
-        .purchase-badge i {
-            margin-right: 8px;
-        }
-        
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-            }
-        }
     </style>
     
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
-    <!-- Badge untuk jumlah pembelian -->
-    <div id="purchase-badge" class="purchase-badge pulse">
-        <i class="fas fa-shopping-bag"></i>
-        <span id="purchase-count">0</span> pembelian hari ini
-    </div>
-
     <!-- Notifikasi Popup yang Diperbaiki -->
     <div id="notification-container" class="notification-container"></div>
 
@@ -386,7 +345,6 @@
         let cart = {};
         let selectedVariantId = null; // Menyimpan ID produk utama yang variannya sedang dipilih
         let lastOrderCount = 0; // Menyimpan jumlah pesanan terakhir
-        let todayOrderCount = 0; // Menyimpan jumlah pesanan hari ini
         let notifications = []; // Menyimpan notifikasi yang aktif
 
         const currencyFormatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
@@ -439,8 +397,6 @@
 
         // Elemen Notifikasi
         const notificationContainer = document.getElementById('notification-container');
-        const purchaseBadge = document.getElementById('purchase-badge');
-        const purchaseCount = document.getElementById('purchase-count');
 
         // --- FUNGSI CORE ---
 
@@ -1137,7 +1093,7 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
             }
             
             // Tambahkan animasi keluar
-            notification.element.classList.add('slide-out');
+            notification.element.classList.remove('show');
             
             // Hapus notifikasi setelah animasi selesai
             setTimeout(() => {
@@ -1148,20 +1104,6 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
             
             // Hapus dari array
             notifications.splice(notificationIndex, 1);
-        }
-        
-        function updatePurchaseBadge(count) {
-            purchaseCount.textContent = count;
-            
-            // Tambahkan efek pulse jika ada pembelian baru
-            if (count > todayOrderCount) {
-                purchaseBadge.classList.add('pulse');
-                setTimeout(() => {
-                    purchaseBadge.classList.remove('pulse');
-                }, 2000);
-            }
-            
-            todayOrderCount = count;
         }
         
         function checkForNewOrders() {
@@ -1201,14 +1143,6 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
                     
                     // Update lastOrderCount
                     lastOrderCount = data.length;
-                    
-                    // Update badge pembelian hari ini
-                    const today = new Date();
-                    const todayOrders = data.filter(order => {
-                        const orderDate = new Date(order.Tanggal);
-                        return orderDate.toDateString() === today.toDateString();
-                    });
-                    updatePurchaseBadge(todayOrders.length);
                 }
             })
             .catch(error => {
@@ -1239,14 +1173,6 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
                 .then(response => response.json())
                 .then(data => {
                     lastOrderCount = data.length;
-                    
-                    // Update badge pembelian hari ini
-                    const today = new Date();
-                    const todayOrders = data.filter(order => {
-                        const orderDate = new Date(order.Tanggal);
-                        return orderDate.toDateString() === today.toDateString();
-                    });
-                    updatePurchaseBadge(todayOrders.length);
                 })
                 .catch(error => {
                     console.error("Error fetching initial order count:", error);
@@ -1254,6 +1180,22 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
                 
                 // Periksa pesanan baru setiap 2 menit
                 setInterval(checkForNewOrders, 120000);
+                
+                // Untuk testing, tampilkan notifikasi contoh setelah 3 detik
+                setTimeout(() => {
+                    const today = new Date();
+                    const dayName = today.toLocaleDateString('id-ID', { weekday: 'long' });
+                    const dateStr = today.toLocaleDateString('id-ID');
+                    const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    
+                    showNotificationPopup(
+                        "Ahmad Rizki", 
+                        "Tas Ransel Premium",
+                        dayName, 
+                        dateStr, 
+                        timeStr
+                    );
+                }, 3000);
             })
             .catch(error => {
                 loadingMessage.innerHTML = `<p class="text-red-600">Gagal memuat produk. Pastikan URL Apps Script sudah benar dan dideploy dengan benar.</p>`;
