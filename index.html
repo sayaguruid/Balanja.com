@@ -852,19 +852,19 @@
             whatsappButton.classList.add('hidden');
         }
 
-        function generateWhatsAppMessage(orderDetails) {
-            const items = orderDetails.items.map(item => `• ${item.name}${item.variantName ? ' (' + item.variantName + ')' : ''} x${item.quantity}`).join('\n');
-            const totalPrice = currencyFormatter.format(orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0));
-            const status = orderDetails.status || 'Menunggu Konfirmasi';
-            const paymentProof = orderDetails.paymentProofUrl && orderDetails.paymentProofUrl !== 'N/A' ? `\nBukti Transfer: ${orderDetails.paymentProofUrl}` : '';
+function generateWhatsAppMessage(orderDetails) {
+    const items = orderDetails.items.map(item => `• ${item.name}${item.variantName ? ' (' + item.variantName + ')' : ''} x${item.quantity}`).join('\n');
+    const totalPrice = currencyFormatter.format(orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0));
+    const status = orderDetails.status || 'Menunggu Konfirmasi';
+    const paymentProof = orderDetails.paymentProofUrl && orderDetails.paymentProofUrl !== 'N/A' ? `\nBukti Transfer: ${orderDetails.paymentProofUrl}` : '';
 
-            const currentDomain = window.location.origin;
-            const path = window.location.pathname.replace(/\/[^/]*$/, ''); 
-            const trackingLink = `${currentDomain}${path}/StatusPesanan.html?kode=${orderDetails.orderNumber}`;
+    const currentDomain = window.location.origin;
+    const path = window.location.pathname.replace(/\/[^/]*$/, ''); 
+    const trackingLink = `${currentDomain}${path}/StatusPesanan.html?kode=${orderDetails.orderNumber}`;
 
-            const message = `Halo Admin, saya telah membuat pesanan.
+    const message = `Halo Admin, saya telah membuat pesanan.
 *Nomor Pesanan:* ${orderDetails.orderNumber}
-Tanggal: ${orderDetails.date}
+Tanggal: ${new Date().toLocaleDateString('id-ID')} // Perbaikan: gunakan tanggal saat ini
 Nama Pelanggan: ${orderDetails.customerName}
 Nomor Telepon: ${orderDetails.customerNumber}
 Alamat: ${orderDetails.customerAddress}
@@ -878,8 +878,8 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
 *Lihat Status Pesanan:*
  ${trackingLink}`;
 
-            return encodeURIComponent(message);
-        }
+    return encodeURIComponent(message);
+}
         
         // --- FUNGSI UNTUK MENYIMPAN DAN MEMUAT DATA PELANGGAN ---
         
