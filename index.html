@@ -1012,75 +1012,74 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
         // --- FUNGSI NOTIFIKASI POPUP YANG DIPERBAIKI ---
         
         function showNotificationPopup(customerName, productName, dayName, dateStr, timeStr) {
-            const notificationId = 'notification-' + Date.now();
-            
-            // Buat elemen notifikasi baru
-            const notificationItem = document.createElement('div');
-            notificationItem.id = notificationId;
-            notificationItem.className = 'notification-item';
-            
-            // Generate avatar acak untuk pelanggan
-            const avatarSeed = customerName.replace(/\s/g, '').toLowerCase();
-            const avatarUrl = `https://picsum.photos/seed/${avatarSeed}/50/50.jpg`;
-            
-            notificationItem.innerHTML = `
-                <div class="notification-avatar">
-                    <img src="${avatarUrl}" alt="${customerName}" class="w-full h-full object-cover">
-                </div>
-                <div class="notification-content">
-                    <div class="notification-title">
-                        <strong>${customerName}</strong> baru saja membeli
-                    </div>
-                    <div class="notification-message">
-                        ${productName}
-                    </div>
-                    <div class="notification-time">
-                        ${dayName}, ${dateStr} pukul ${timeStr}
-                    </div>
-                </div>
-                <button class="notification-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            
-            // Tambahkan notifikasi ke container
-            notificationContainer.appendChild(notificationItem);
-            
-            // Tambahkan ke array notifikasi aktif
-            notifications.push({
-                id: notificationId,
-                element: notificationItem,
-                timeout: null
-            });
-            
-            // Tampilkan notifikasi dengan animasi
-            setTimeout(() => {
-                notificationItem.classList.add('show');
-            }, 100);
-            
-            // Tambahkan event listener untuk tombol tutup
-            const closeButton = notificationItem.querySelector('.notification-close');
-            closeButton.addEventListener('click', () => {
-                removeNotification(notificationId);
-            });
-            
-            // Atur timeout untuk menghapus notifikasi setelah 7 detik
-            const timeout = setTimeout(() => {
-                removeNotification(notificationId);
-            }, 7000);
-            
-            // Simpan timeout ke array notifikasi
-            const notification = notifications.find(n => n.id === notificationId);
-            if (notification) {
-                notification.timeout = timeout;
-            }
-            
-            // Batasi jumlah notifikasi yang ditampilkan
-            if (notifications.length > 3) {
-                removeNotification(notifications[0].id);
-            }
-        }
-        
+    const notificationId = 'notification-' + Date.now();
+    
+    // Buat elemen notifikasi baru
+    const notificationItem = document.createElement('div');
+    notificationItem.id = notificationId;
+    notificationItem.className = 'notification-item';
+    
+    // Generate avatar acak untuk pelanggan
+    const avatarSeed = customerName.replace(/\s/g, '').toLowerCase();
+    const avatarUrl = `https://picsum.photos/seed/${avatarSeed}/50/50.jpg`;
+    
+    notificationItem.innerHTML = `
+        <div class="notification-avatar">
+            <img src="${avatarUrl}" alt="${customerName}" class="w-full h-full object-cover">
+        </div>
+        <div class="notification-content">
+            <div class="notification-title">
+                <strong>${customerName}</strong> baru saja membeli
+            </div>
+            <div class="notification-message">
+                ${productName}
+            </div>
+            <div class="notification-time">
+                ${dayName}, ${dateStr} pukul ${timeStr}
+            </div>
+        </div>
+        <button class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // Tambahkan notifikasi ke container
+    notificationContainer.appendChild(notificationItem);
+    
+    // Tambahkan ke array notifikasi aktif
+    notifications.push({
+        id: notificationId,
+        element: notificationItem,
+        timeout: null
+    });
+    
+    // Tampilkan notifikasi dengan animasi
+    setTimeout(() => {
+        notificationItem.classList.add('show');
+    }, 100);
+    
+    // Tambahkan event listener untuk tombol tutup
+    const closeButton = notificationItem.querySelector('.notification-close');
+    closeButton.addEventListener('click', () => {
+        removeNotification(notificationId);
+    });
+    
+    // Atur timeout untuk menghapus notifikasi setelah 7 detik
+    const timeout = setTimeout(() => {
+        removeNotification(notificationId);
+    }, 7000);
+    
+    // Simpan timeout ke array notifikasi
+    const notification = notifications.find(n => n.id === notificationId);
+    if (notification) {
+        notification.timeout = timeout;
+    }
+    
+    // Batasi jumlah notifikasi yang ditampilkan
+    if (notifications.length > 3) {
+        removeNotification(notifications[0].id);
+    }
+}
         function removeNotification(notificationId) {
             const notificationIndex = notifications.findIndex(n => n.id === notificationId);
             if (notificationIndex === -1) return;
@@ -1106,69 +1105,71 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
             notifications.splice(notificationIndex, 1);
         }
         
-        function checkForNewOrders() {
-            fetch("https://script.google.com/macros/s/AKfycbzPsZGLIA1MOLMmc_63mFcNHmoCVALlCBtZ6PuV5gPYfss3VAjBKvAnYJceHbAOXkNK/exec?action=getOrders")
-            .then(response => response.json())
-            .then(data => {
-                // Tambahkan log untuk debugging
-                console.log("Data dari sheet Pesanan:", data);
-                
-                if (data.length > lastOrderCount) {
-                    // Ada pesanan baru
-                    const newOrders = data.slice(0, data.length - lastOrderCount);
-                    
-                    // Proses setiap pesanan baru
-                    newOrders.forEach(order => {
-                        // Format tanggal dari sheet: "07/12/2025 5:55:45"
-                        const dateStr = order.Tanggal;
-                        const dateParts = dateStr.split(' ');
-                        const dateOnly = dateParts[0]; // "07/12/2025"
-                        const timeOnly = dateParts[1]; // "5:55:45"
-                        
-                        // Parse tanggal
-                        const [day, month, year] = dateOnly.split('/');
-                        const dateObj = new Date(`${year}-${month}-${day}T${timeOnly}`);
-                        
-                        const dayName = dateObj.toLocaleDateString('id-ID', { weekday: 'long' });
-                        const formattedDate = dateObj.toLocaleDateString('id-ID');
-                        const formattedTime = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                        
-                        // Proses data Items (JSON) untuk menampilkan nama produk
-                        let productName = "beberapa produk";
-                        try {
-                            const items = JSON.parse(order["Items (JSON)"]);
-                            if (items && items.length > 0) {
-                                if (items.length === 1) {
-                                    productName = items[0].name;
-                                    if (items[0].variantName) {
-                                        productName += ` (${items[0].variantName})`;
-                                    }
-                                } else {
-                                    productName = `${items.length} produk`;
-                                }
-                            }
-                        } catch (e) {
-                            console.error("Error parsing items JSON:", e);
-                        }
-                        
-                        // Tampilkan notifikasi
-                        showNotificationPopup(
-                            order["Nama Pelanggan"], 
-                            productName,
-                            dayName, 
-                            formattedDate, 
-                            formattedTime
-                        );
-                    });
-                    
-                    // Update lastOrderCount
-                    lastOrderCount = data.length;
-                }
-            })
-            .catch(error => {
-                console.error("Error checking for new orders:", error);
-            });
+function checkForNewOrders() {
+    fetch("https://script.google.com/macros/s/AKfycbzPsZGLIA1MOLMmc_63mFcNHmoCVALlCBtZ6PuV5gPYfss3VAjBKvAnYJceHbAOXkNK/exec?action=getOrders")
+    .then(response => response.json())
+    .then(data => {
+        // Tambahkan log untuk debugging
+        console.log("Data dari sheet Pesanan:", data);
+        
+        // Pastikan data adalah array
+        if (!Array.isArray(data)) {
+            console.error("Data dari bukan array:", data);
+            return;
         }
+        
+        // Jika ada pesanan, tampilkan notifikasi untuk pesanan pertama
+        if (data.length > 0) {
+            // Ambil pesanan acak dari data
+            const randomIndex = Math.floor(Math.random() * data.length);
+            const order = data[randomIndex];
+            
+            // Format tanggal dari sheet: "07/12/2025 5:55:45"
+            const dateStr = order.Tanggal;
+            const dateParts = dateStr.split(' ');
+            const dateOnly = dateParts[0]; // "07/12/2025"
+            const timeOnly = dateParts[1]; // "5:55:45"
+            
+            // Parse tanggal
+            const [day, month, year] = dateOnly.split('/');
+            const dateObj = new Date(`${year}-${month}-${day}T${timeOnly}`);
+            
+            const dayName = dateObj.toLocaleDateString('id-ID', { weekday: 'long' });
+            const formattedDate = dateObj.toLocaleDateString('id-ID');
+            const formattedTime = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            
+            // Proses data Items (JSON) untuk menampilkan nama produk
+            let productName = "beberapa produk";
+            try {
+                const items = order["Items (JSON)"];
+                if (items && items.length > 0) {
+                    if (items.length === 1) {
+                        productName = items[0].name;
+                        if (items[0].variantName) {
+                            productName += ` (${items[0].variantName})`;
+                        }
+                    } else {
+                        productName = `${items.length} produk`;
+                    }
+                }
+            } catch (e) {
+                console.error("Error parsing items JSON:", e);
+            }
+            
+            // Tampilkan notifikasi
+            showNotificationPopup(
+                order["Nama Pelanggan"], 
+                productName,
+                dayName, 
+                formattedDate, 
+                formattedTime
+            );
+        }
+    })
+    .catch(error => {
+        console.error("Error checking for new orders:", error);
+    });
+}
         
         // --- INITIALIZATION ---
 
@@ -1194,7 +1195,7 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
                 .then(data => {
                     lastOrderCount = data.length;
                     
-                    // Periksa pesanan baru setiap 2 menit
+                    // Periksa pesanan baru setiap 30 detik
                     setInterval(checkForNewOrders, 30000);
                     
                     // Jalankan pemeriksaan pertama kali setelah 5 detik
