@@ -43,6 +43,17 @@
     
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
+    <!-- Notifikasi Popup -->
+    <div id="notification-popup" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-[70]">
+        <div class="flex items-center">
+            <i class="fas fa-bell mr-2"></i>
+            <div>
+                <p class="font-bold">Pesanan Baru!</p>
+                <p id="notification-message" class="text-sm"></p>
+            </div>
+        </div>
+    </div>
+
     <main class="flex-1 p-4 md:p-8">
         <header class="flex flex-col items-center mb-6 text-center">
             <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Balanja.com</h1>
@@ -232,6 +243,7 @@
         let qrisUrl = "";
         let cart = {};
         let selectedVariantId = null; // Menyimpan ID produk utama yang variannya sedang dipilih
+        let lastOrderCount = 0; // Menyimpan jumlah pesanan terakhir
 
         const currencyFormatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
         
@@ -894,6 +906,46 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
             }
         }
         
+        // --- FUNGSI NOTIFIKASI POPUP ---
+        
+        function showNotificationPopup(customerName, dayName, dateStr, timeStr) {
+            const notificationPopup = document.getElementById('notification-popup');
+            const notificationMessage = document.getElementById('notification-message');
+            
+            notificationMessage.textContent = `${customerName} telah memesan pada hari ${dayName} tanggal ${dateStr} pukul ${timeStr}`;
+            
+            // Tampilkan popup
+            notificationPopup.classList.remove('translate-x-full');
+            
+            // Sembunyikan popup setelah 5 detik
+            setTimeout(() => {
+                notificationPopup.classList.add('translate-x-full');
+            }, 5000);
+        }
+
+        function checkForNewOrders() {
+            fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec?action=getOrders")
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > lastOrderCount) {
+                    // Ada pesanan baru
+                    const newOrder = data[0]; // Pesanan terbaru
+                    const orderDate = new Date(newOrder.Tanggal);
+                    const dayName = orderDate.toLocaleDateString('id-ID', { weekday: 'long' });
+                    const dateStr = orderDate.toLocaleDateString('id-ID');
+                    const timeStr = orderDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    
+                    showNotificationPopup(newOrder["Nama Pelanggan"], dayName, dateStr, timeStr);
+                    
+                    // Update lastOrderCount
+                    lastOrderCount = data.length;
+                }
+            })
+            .catch(error => {
+                console.error("Error checking for new orders:", error);
+            });
+        }
+        
         // --- INITIALIZATION ---
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -911,6 +963,19 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
                 loadCart();
                 renderProducts(products);
                 renderCart();
+                
+                // Dapatkan jumlah pesanan awal
+                fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec?action=getOrders")
+                .then(response => response.json())
+                .then(data => {
+                    lastOrderCount = data.length;
+                })
+                .catch(error => {
+                    console.error("Error fetching initial order count:", error);
+                });
+                
+                // Periksa pesanan baru setiap 2 menit
+                setInterval(checkForNewOrders, 120000);
             })
             .catch(error => {
                 loadingMessage.innerHTML = `<p class="text-red-600">Gagal memuat produk. Pastikan URL Apps Script sudah benar dan dideploy dengan benar.</p>`;
