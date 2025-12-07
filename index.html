@@ -236,7 +236,7 @@
         © 2025 Balanja.com. All Rights Reserved.
     </footer>
     
-    <script src="https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec" defer></script>
+    <script src="https://script.google.com/macros/s/AKfycbzPsZGLIA1MOLMmc_63mFcNHmoCVALlCBtZ6PuV5gPYfss3VAjBKvAnYJceHbAOXkNK/exec" defer></script>
 
     <script>
         let products = [];
@@ -589,7 +589,7 @@
                 reader.onload = function () {
                     const base64Content = reader.result.split(',')[1];
                     
-                    fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec", {
+                    fetch("https://script.google.com/macros/s/AKfycbzPsZGLIA1MOLMmc_63mFcNHmoCVALlCBtZ6PuV5gPYfss3VAjBKvAnYJceHbAOXkNK/exec", {
                         method: "POST",
                         body: JSON.stringify({
                             action: "uploadImage",
@@ -650,7 +650,7 @@
              // 2. Kirim Pesanan ke Apps Script
              orderDetails.paymentProofUrl = proofUrl; // Tambahkan URL bukti pembayaran
 
-             fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec", {
+             fetch("https://script.google.com/macros/s/AKfycbzPsZGLIA1MOLMmc_63mFcNHmoCVALlCBtZ6PuV5gPYfss3VAjBKvAnYJceHbAOXkNK/exec", {
                  method: "POST",
                  body: JSON.stringify({
                      action: "processOrder",
@@ -924,7 +924,7 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
         }
 
         function checkForNewOrders() {
-            fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec?action=getOrders")
+            fetch("https://script.google.com/macros/s/AKfycbzPsZGLIA1MOLMmc_63mFcNHmoCVALlCBtZ6PuV5gPYfss3VAjBKvAnYJceHbAOXkNK/exec?action=getOrders")
             .then(response => response.json())
             .then(data => {
                 if (data.length > lastOrderCount) {
@@ -949,7 +949,7 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
         // --- INITIALIZATION ---
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec")
+            fetch("https://script.google.com/macros/s/AKfycbzPsZGLIA1MOLMmc_63mFcNHmoCVALlCBtZ6PuV5gPYfss3VAjBKvAnYJceHbAOXkNK/exec")
             .then(response => {
                 if (!response.ok) throw new Error('Failed to fetch products');
                 return response.json();
@@ -965,7 +965,7 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
                 renderCart();
                 
                 // Dapatkan jumlah pesanan awal
-                fetch("https://script.google.com/macros/s/AKfycbwGfXtJFynLivx7GZL6LLjMRCdTxoz9SnxQonznCITi87yri1SYypwHd7i8Z3HviChD/exec?action=getOrders")
+                fetch("https://script.google.com/macros/s/AKfycbzPsZGLIA1MOLMmc_63mFcNHmoCVALlCBtZ6PuV5gPYfss3VAjBKvAnYJceHbAOXkNK/exec?action=getOrders")
                 .then(response => response.json())
                 .then(data => {
                     lastOrderCount = data.length;
