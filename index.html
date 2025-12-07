@@ -1111,7 +1111,7 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
             .then(response => response.json())
             .then(data => {
                 // Tambahkan log untuk debugging
-                console.log("Data dari sheet Pesananan:", data);
+                console.log("Data dari sheet Pesanan:", data);
                 
                 if (data.length > lastOrderCount) {
                     // Ada pesanan baru
@@ -1119,23 +1119,45 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
                     
                     // Proses setiap pesanan baru
                     newOrders.forEach(order => {
-                        // Asumsikan kolom tanggal bernama "Timestamp"
-                        const orderDate = new Date(order.Timestamp);
-                        const dayName = orderDate.toLocaleDateString('id-ID', { weekday: 'long' });
-                        const dateStr = orderDate.toLocaleDateString('id-ID');
-                        const timeStr = orderDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                        // Format tanggal dari sheet: "07/12/2025 5:55:45"
+                        const dateStr = order.Tanggal;
+                        const dateParts = dateStr.split(' ');
+                        const dateOnly = dateParts[0]; // "07/12/2025"
+                        const timeOnly = dateParts[1]; // "5:55:45"
                         
-                        // Asumsikan kolom nama produk bernama "Produk"
-                        // Jika ada beberapa produk, bisa dipisah dengan koma
-                        let productName = order.Produk || "beberapa produk";
+                        // Parse tanggal
+                        const [day, month, year] = dateOnly.split('/');
+                        const dateObj = new Date(`${year}-${month}-${day}T${timeOnly}`);
+                        
+                        const dayName = dateObj.toLocaleDateString('id-ID', { weekday: 'long' });
+                        const formattedDate = dateObj.toLocaleDateString('id-ID');
+                        const formattedTime = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                        
+                        // Proses data Items (JSON) untuk menampilkan nama produk
+                        let productName = "beberapa produk";
+                        try {
+                            const items = JSON.parse(order["Items (JSON)"]);
+                            if (items && items.length > 0) {
+                                if (items.length === 1) {
+                                    productName = items[0].name;
+                                    if (items[0].variantName) {
+                                        productName += ` (${items[0].variantName})`;
+                                    }
+                                } else {
+                                    productName = `${items.length} produk`;
+                                }
+                            }
+                        } catch (e) {
+                            console.error("Error parsing items JSON:", e);
+                        }
                         
                         // Tampilkan notifikasi
                         showNotificationPopup(
                             order["Nama Pelanggan"], 
                             productName,
                             dayName, 
-                            dateStr, 
-                            timeStr
+                            formattedDate, 
+                            formattedTime
                         );
                     });
                     
@@ -1173,7 +1195,7 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
                     lastOrderCount = data.length;
                     
                     // Periksa pesanan baru setiap 2 menit
-                    setInterval(checkForNewOrders, 120000);
+                    setInterval(checkForNewOrders, 30000);
                     
                     // Jalankan pemeriksaan pertama kali setelah 5 detik
                     setTimeout(checkForNewOrders, 5000);
