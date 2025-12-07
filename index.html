@@ -1010,16 +1010,13 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
         }
         
         // --- FUNGSI NOTIFIKASI POPUP YANG DIPERBAIKI ---
-        
-        function showNotificationPopup(customerName, productName, dayName, dateStr, timeStr) {
+        function showNotificationPopup(customerName, productName, fullDateTime) {
     const notificationId = 'notification-' + Date.now();
     
-    // Buat elemen notifikasi baru
     const notificationItem = document.createElement('div');
     notificationItem.id = notificationId;
     notificationItem.className = 'notification-item';
     
-    // Generate avatar acak untuk pelanggan
     const avatarSeed = customerName.replace(/\s/g, '').toLowerCase();
     const avatarUrl = `https://picsum.photos/seed/${avatarSeed}/50/50.jpg`;
     
@@ -1034,8 +1031,9 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
             <div class="notification-message">
                 ${productName}
             </div>
+            <!-- Tampilkan string tanggal langsung -->
             <div class="notification-time">
-                ${dayName}, ${dateStr} pukul ${timeStr}
+                ${fullDateTime}
             </div>
         </div>
         <button class="notification-close">
@@ -1118,52 +1116,55 @@ function checkForNewOrders() {
             return;
         }
         
-        // Jika ada pesanan, tampilkan notifikasi untuk pesanan pertama
-        if (data.length > 0) {
-            // Ambil pesanan acak dari data
-            const randomIndex = Math.floor(Math.random() * data.length);
-            const order = data[randomIndex];
+        if (data.length > lastOrderCount) {
+            // Ada pesanan baru
+            const newOrders = data.slice(0, data.length - lastOrderCount);
             
-            // Format tanggal dari sheet: "07/12/2025 5:55:45"
-            const dateStr = order.Tanggal;
-            const dateParts = dateStr.split(' ');
-            const dateOnly = dateParts[0]; // "07/12/2025"
-            const timeOnly = dateParts[1]; // "5:55:45"
-            
-            // Parse tanggal
-            const [day, month, year] = dateOnly.split('/');
-            const dateObj = new Date(`${year}-${month}-${day}T${timeOnly}`);
-            
-            const dayName = dateObj.toLocaleDateString('id-ID', { weekday: 'long' });
-            const formattedDate = dateObj.toLocaleDateString('id-ID');
-            const formattedTime = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            
-            // Proses data Items (JSON) untuk menampilkan nama produk
-            let productName = "beberapa produk";
-            try {
-                const items = order["Items (JSON)"];
-                if (items && items.length > 0) {
-                    if (items.length === 1) {
-                        productName = items[0].name;
-                        if (items[0].variantName) {
-                            productName += ` (${items[0].variantName})`;
-                        }
-                    } else {
-                        productName = `${items.length} produk`;
-                    }
+            // Proses setiap pesanan baru
+            newOrders.forEach(order => {
+                // --- PERUBAAN DIMULAI DI SINI ---
+                
+                // Gunakan string tanggal langsung dari Apps Script
+                // Contoh format: "07 Des 2025 17:55"
+                const fullDateTime = order.Tanggal; 
+                
+                // Jika tanggal tidak ada, hentikan proses untuk notifikasi ini
+                if (!fullDateTime) {
+                    console.error("Data Tanggal tidak ditemukan untuk order:", order["Order Number"]);
+                    return;
                 }
-            } catch (e) {
-                console.error("Error parsing items JSON:", e);
-            }
+                
+                // Proses data Items (JSON) untuk menampilkan nama produk
+                let productName = "beberapa produk";
+                try {
+                    // Pastikan kita mengakses key yang benar dari respons JSON
+                    const items = order["Items (JSON)"]; 
+                    if (items && items.length > 0) {
+                        if (items.length === 1) {
+                            productName = items[0].name;
+                            if (items[0].variantName) {
+                                productName += ` (${items[0].variantName})`;
+                            }
+                        } else {
+                            productName = `${items.length} produk`;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error parsing items JSON:", e);
+                }
+                
+                // Tampilkan notifikasi dengan data yang sudah benar
+                showNotificationPopup(
+                    order["Nama Pelanggan"], 
+                    productName,
+                    fullDateTime // Gunakan string tanggal lengkap langsung
+                );
+                
+                // --- PERUBAEKN SELESAI DI SINI ---
+            });
             
-            // Tampilkan notifikasi
-            showNotificationPopup(
-                order["Nama Pelanggan"], 
-                productName,
-                dayName, 
-                formattedDate, 
-                formattedTime
-            );
+            // Update lastOrderCount
+            lastOrderCount = data.length;
         }
     })
     .catch(error => {
