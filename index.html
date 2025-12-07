@@ -20,6 +20,25 @@
         @keyframes pulse { 0% { opacity: 0.8; } 50% { opacity: 0.5; } 100% { opacity: 0.8; } }
         .checkout-sidebar { width: 100%; max-width: 450px; }
         @media (min-width: 768px) { .checkout-sidebar { width: 450px; } }
+        .copy-feedback { position: relative; }
+        .copy-feedback:after {
+            content: "Tersalin!";
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4ade80;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .copy-feedback.show:after {
+            opacity: 1;
+        }
     </style>
     
 </head>
@@ -130,8 +149,16 @@
                         </div>
                         <div id="bsi-container" class="hidden text-left">
                             <p class="text-sm font-bold text-gray-800 mb-2">Transfer ke Bank Syariah Indonesia (BSI):</p>
-                            <p class="text-lg font-bold text-gray-700">1042896434</p>
-                            <p class="text-sm text-gray-600">A.N. Usman Firdaus</p>
+                            <div class="flex items-center justify-between bg-white p-3 rounded-lg">
+                                <div>
+                                    <p class="text-lg font-bold text-gray-700">1042896434</p>
+                                    <p class="text-sm text-gray-600">A.N. Usman Firdaus</p>
+                                </div>
+                                <button type="button" id="copy-account-btn" class="copy-feedback bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-700 transition flex items-center gap-2">
+                                    <i class="fas fa-copy"></i>
+                                    <span>Salin</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -175,20 +202,20 @@
             <h3 id="modal-title" class="text-xl font-bold mb-4"></h3>
             <p id="modal-message" class="text-gray-700 mb-6"></p>
             <a id="modal-link" href="#" target="_blank" class="hidden text-indigo-600 underline hover:text-indigo-800 font-medium mb-6">Lihat Status Pesanan</a>
-<a id="whatsapp-button" href="#" target="_blank"
-   class="hidden w-full bg-[#25D366] text-white font-semibold py-3 px-5 rounded-xl
-          shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3">
-    
-    <!-- Ikon WhatsApp bulat -->
-    <div class="bg-white p-2 rounded-full">
-        <svg class="w-6 h-6" fill="#25D366" viewBox="0 0 32 32">
-            <path d="M16.001 3.2c-7.063 0-12.8 5.736-12.8 12.8 0 2.256.592 4.457 1.712 6.4L3.2 28.8l6.592-1.696c1.856.992 3.952 1.52 6.208 1.52h.001c7.063 0 12.8-5.736 12.8-12.8s-5.737-12.8-12.8-12.8zm0 23.04h-.001c-1.92 0-3.792-.512-5.44-1.472l-.384-.224-3.904 1.008 1.04-3.808-.256-.4A10.43 10.43 0 0 1 5.6 16c0-5.76 4.64-10.4 10.4-10.4s10.4 4.64 10.4 10.4-4.64 10.4-10.399 10.4z"/>
-            <path d="M22.24 19.52c-.384-.192-2.272-1.12-2.624-1.248-.352-.128-.608-.192-.864.192-.256.384-1.008 1.248-1.232 1.504-.224.256-.448.288-.832.096-2.24-1.12-3.712-3.968-3.84-4.224-.128-.256-.013-.384.128-.512.128-.128.256-.32.384-.480.128-.16.192-.288.288-.48.096-.192.048-.352-.016-.496-.064-.144-.864-2.048-1.184-2.816-.32-.768-.656-.672-.864-.672s-.48-.032-.736-.032c-.256 0-.672.096-1.024.48-.352.384-1.344 1.312-1.344 3.2 0 1.888 1.376 3.712 1.568 3.968.192.256 2.704 4.128 6.592 5.76.92.4 1.637.64 2.194.819.92.293 1.756.252 2.419.153.738-.11 2.272-.928 2.592-1.824.32-.896.32-1.664.224-1.824-.096-.16-.352-.256-.736-.448z"/>
-        </svg>
-    </div>
+            <a id="whatsapp-button" href="#" target="_blank"
+               class="hidden w-full bg-[#25D366] text-white font-semibold py-3 px-5 rounded-xl
+                      shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3">
+                
+                <!-- Ikon WhatsApp bulat -->
+                <div class="bg-white p-2 rounded-full">
+                    <svg class="w-6 h-6" fill="#25D366" viewBox="0 0 32 32">
+                        <path d="M16.001 3.2c-7.063 0-12.8 5.736-12.8 12.8 0 2.256.592 4.457 1.712 6.4L3.2 28.8l6.592-1.696c1.856.992 3.952 1.52 6.208 1.52h.001c7.063 0 12.8-5.736 12.8-12.8s-5.737-12.8-12.8-12.8zm0 23.04h-.001c-1.92 0-3.792-.512-5.44-1.472l-.384-.224-3.904 1.008 1.04-3.808-.256-.4A10.43 10.43 0 0 1 5.6 16c0-5.76 4.64-10.4 10.4-10.4s10.4 4.64 10.4 10.4-4.64 10.4-10.399 10.4z"/>
+                        <path d="M22.24 19.52c-.384-.192-2.272-1.12-2.624-1.248-.352-.128-.608-.192-.864.192-.256.384-1.008 1.248-1.232 1.504-.224.256-.448.288-.832.096-2.24-1.12-3.712-3.968-3.84-4.224-.128-.256-.013-.384.128-.512.128-.128.256-.32.384-.480.128-.16.192-.288.288-.48.096-.192.048-.352-.016-.496-.064-.144-.864-2.048-1.184-2.816-.32-.768-.656-.672-.864-.672s-.48-.032-.736-.032c-.256 0-.672.096-1.024.48-.352.384-1.344 1.312-1.344 3.2 0 1.888 1.376 3.712 1.568 3.968.192.256 2.704 4.128 6.592 5.76.92.4 1.637.64 2.194.819.92.293 1.756.252 2.419.153.738-.11 2.272-.928 2.592-1.824.32-.896.32-1.664.224-1.824-.096-.16-.352-.256-.736-.448z"/>
+                    </svg>
+                </div>
 
-    <span class="text-lg font-bold tracking-wide">Hubungi Admin</span>
-</a>
+                <span class="text-lg font-bold tracking-wide">Hubungi Admin</span>
+            </a>
 
             <button id="modal-close" class="bg-gray-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-900 transition mt-4">Tutup</button>
         </div>
@@ -237,6 +264,7 @@
         const uploadProofContainer = document.getElementById('upload-proof-container');
         const paymentProofFile = document.getElementById('paymentProofFile'); // Ganti dengan input file
         const uploadStatusEl = document.getElementById('upload-status'); // Status upload
+        const copyAccountBtn = document.getElementById('copy-account-btn'); // Tombol copy nomor rekening
         
         // Elemen Modal
         const modal = document.getElementById('modal');
@@ -683,6 +711,22 @@
             }
         });
 
+        // Copy Account Number
+        copyAccountBtn.addEventListener('click', () => {
+            const accountNumber = '1042896434';
+            navigator.clipboard.writeText(accountNumber)
+                .then(() => {
+                    copyAccountBtn.classList.add('show');
+                    setTimeout(() => {
+                        copyAccountBtn.classList.remove('show');
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Gagal menyalin nomor rekening: ', err);
+                    alert('Gagal menyalin nomor rekening. Silakan salin secara manual.');
+                });
+        });
+
         // Checkout & Payment Listeners
         checkoutForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -716,7 +760,7 @@
                 uploadStatusEl.classList.add('hidden');
 
                 if (method === "QRIS") {
-                    qrisImageCheckout.src = qrisUrl;
+                    document.getElementById('qris-image-checkout').src = qrisUrl;
                     qrisContainer.classList.remove('hidden');
                     paymentDetailsContainer.classList.remove('hidden');
                     uploadProofContainer.classList.remove('hidden');
@@ -770,25 +814,24 @@
             placeOrderButton.disabled = false;
         }
 
-function showModal(title, message, isSuccess = true, orderNumber = null) {
-    modalTitle.textContent = title;
-    modalTitle.className = `text-xl font-bold mb-4 ${isSuccess ? 'text-gray-800' : 'text-red-600'}`;
-    modalMessage.innerHTML = message;
+        function showModal(title, message, isSuccess = true, orderNumber = null) {
+            modalTitle.textContent = title;
+            modalTitle.className = `text-xl font-bold mb-4 ${isSuccess ? 'text-gray-800' : 'text-red-600'}`;
+            modalMessage.innerHTML = message;
 
-    if (isSuccess && orderNumber) {
-        const currentDomain = window.location.origin;
-        const path = window.location.pathname.replace(/\/[^/]*$/, ''); 
-        const trackingLink = `${currentDomain}${path}/StatusPesanan.html?kode=${orderNumber}`;
+            if (isSuccess && orderNumber) {
+                const currentDomain = window.location.origin;
+                const path = window.location.pathname.replace(/\/[^/]*$/, ''); 
+                const trackingLink = `${currentDomain}${path}/StatusPesanan.html?kode=${orderNumber}`;
 
-        modalLink.href = trackingLink;
-        modalLink.classList.remove('hidden');
-    } else {
-        modalLink.classList.add('hidden');
-    }
+                modalLink.href = trackingLink;
+                modalLink.classList.remove('hidden');
+            } else {
+                modalLink.classList.add('hidden');
+            }
 
-    modal.classList.remove('hidden');
-}
-
+            modal.classList.remove('hidden');
+        }
 
         function hideModal() { 
             modal.classList.add('hidden');
@@ -801,9 +844,9 @@ function showModal(title, message, isSuccess = true, orderNumber = null) {
             const status = orderDetails.status || 'Menunggu Konfirmasi';
             const paymentProof = orderDetails.paymentProofUrl && orderDetails.paymentProofUrl !== 'N/A' ? `\nBukti Transfer: ${orderDetails.paymentProofUrl}` : '';
 
-const currentDomain = window.location.origin;
-const path = window.location.pathname.replace(/\/[^/]*$/, ''); 
-const trackingLink = `${currentDomain}${path}/StatusPesanan.html?kode=${orderDetails.orderNumber}`;
+            const currentDomain = window.location.origin;
+            const path = window.location.pathname.replace(/\/[^/]*$/, ''); 
+            const trackingLink = `${currentDomain}${path}/StatusPesanan.html?kode=${orderDetails.orderNumber}`;
 
             const message = `Halo Admin, saya telah membuat pesanan.
 *Nomor Pesanan:* ${orderDetails.orderNumber}
@@ -813,13 +856,13 @@ Nomor Telepon: ${orderDetails.customerNumber}
 Alamat: ${orderDetails.customerAddress}
 Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
 *Ringkasan Pesanan:*
-${items}
+ ${items}
 *Total Harga:*
-${totalPrice}
+ ${totalPrice}
 *Status:*
-${status}
+ ${status}
 *Lihat Status Pesanan:*
-${trackingLink}`;
+ ${trackingLink}`;
 
             return encodeURIComponent(message);
         }
