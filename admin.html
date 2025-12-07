@@ -599,24 +599,24 @@
             </section>
 
             <section id="kelola-pesanan" class="content-section">
-                <h2>Kelola Pesanan</h2>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Tanggal</th>
-                            <th>Nomor Pesanan</th>
-                            <th>Nama Pelanggan</th>
-                            <th>Produk</th>
-                            <th>Metode Pembayaran</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orderTableBody">
-                        </tbody>
-                </table>
-            </section>
-
+    <h2>Kelola Pesanan</h2>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Nomor Pesanan</th>
+                <th>Nama Pelanggan</th>
+                <th>Produk</th>
+                <th>Metode Pembayaran</th>
+                <th>Bukti Pembayaran</th> <!-- TAMBAHKAN INI -->
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="orderTableBody">
+        </tbody>
+    </table>
+</section>
             <section id="kelola-produk" class="content-section">
                 <h2>Kelola Produk</h2>
                 <button class="btn btn-primary" onclick="openProductModal()">+ Tambah Produk</button>
@@ -1031,74 +1031,106 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
         // --- Fungsi Manajemen Pesanan ---
         async function fetchOrders() {
-            showLoading();
-            const response = await fetch(`${WEB_APP_URL}?action=getOrders`);
-            const result = await response.json();
-            hideLoading();
+    showLoading();
+    const response = await fetch(`${WEB_APP_URL}?action=getOrders`);
+    const result = await response.json();
+    hideLoading();
 
-            if (result.error) {
-                alert("Gagal memuat pesanan: " + result.error);
-                return;
-            }
-            
-            const tableBody = document.getElementById("orderTableBody");
-            tableBody.innerHTML = '';
-            result.forEach(order => {
-                const productSummary = order.Items.map(item => `${item.name} (${item.quantity})`).join(', ');
-                const row = `
-                    <tr>
-                        <td>${order.Tanggal}</td>
-                        <td>${order["Order Number"]}</td>
-                        <td>${order["Nama Pelanggan"]}</td>
-                        <td>${productSummary}</td>
-                        <td>${order["Metode Pembayaran"]}</td>
-                        <td><span class="status-badge ${order.Status.split(' ')[0]}">${order.Status}</span></td>
-                        <td>
-                            <button class="btn btn-primary" onclick="viewOrderDetails('${order["Order Number"]}')">Detail</button>
-                            <select class="btn" onchange="updateStatus('${order["Order Number"]}', this.value)">
-                                <option value="" disabled selected>Ubah Status</option>
-                                <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
-                                <option value="Diproses">Diproses</option>
-                                <option value="Selesai">Selesai</option>
-                                <option value="Dibatalkan">Dibatalkan</option>
-                            </select>
-                        </td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
+    if (result.error) {
+        alert("Gagal memuat pesanan: " + result.error);
+        return;
+    }
+    
+    const tableBody = document.getElementById("orderTableBody");
+    tableBody.innerHTML = '';
+    result.forEach(order => {
+        const productSummary = order.Items.map(item => `${item.name} (${item.quantity})`).join(', ');
+        
+        // Format URL bukti pembayaran untuk ditampilkan
+        let paymentProofHtml = '';
+        if (order["Bukti Pembayaran"]) {
+            paymentProofHtml = `<a href="${order["Bukti Pembayaran"]}" target="_blank">Lihat Bukti</a>`;
+        } else {
+            paymentProofHtml = 'Tidak ada';
         }
         
-        async function viewOrderDetails(orderNumber) {
-            showLoading();
-            const response = await fetch(`${WEB_APP_URL}?action=getOrders`);
-            const orders = await response.json();
-            hideLoading();
-            const order = orders.find(o => String(o["Order Number"]) === String(orderNumber));
+        const row = `
+            <tr>
+                <td>${order.Tanggal}</td>
+                <td>${order["Order Number"]}</td>
+                <td>${order["Nama Pelanggan"]}</td>
+                <td>${productSummary}</td>
+                <td>${order["Metode Pembayaran"]}</td>
+                <td><span class="status-badge ${order.Status.split(' ')[0]}">${order.Status}</span></td>
+                <td>
+                    <button class="btn btn-primary" onclick="viewOrderDetails('${order["Order Number"]}')">Detail</button>
+                    <select class="btn" onchange="updateStatus('${order["Order Number"]}', this.value)">
+                        <option value="" disabled selected>Ubah Status</option>
+                        <option value="Menunggu Konfirmasi">Menunggu Konfirmasi</option>
+                        <option value="Diproses">Diproses</option>
+                        <option value="Selesai">Selesai</option>
+                        <option value="Dibatalkan">Dibatalkan</option>
+                    </select>
+                </td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
+}
+        
+       async function viewOrderDetails(orderNumber) {
+    showLoading();
+    const response = await fetch(`${WEB_APP_URL}?action=getOrders`);
+    const orders = await response.json();
+    hideLoading();
+    const order = orders.find(o => String(o["Order Number"]) === String(orderNumber));
+    
+    if (order) {
+        document.getElementById('orderNumberDetails').textContent = order['Order Number'];
+        document.getElementById('orderDateDetails').textContent = order.Tanggal;
+        document.getElementById('customerNameDetails').textContent = order['Nama Pelanggan'];
+        document.getElementById('customerNumberDetails').textContent = order['Nomor Telepon'];
+        document.getElementById('customerAddressDetails').textContent = order.Alamat;
+        document.getElementById('paymentMethodDetails').textContent = order['Metode Pembayaran'];
+        document.getElementById('statusDetails').textContent = order.Status;
+        
+        // Tambahkan bukti pembayaran
+        const paymentProofHtml = order["Bukti Pembayaran"] ? 
+            `<a href="${order["Bukti Pembayaran"]}" target="_blank">Lihat Bukti Pembayaran</a>` : 
+            'Tidak ada bukti pembayaran';
+        
+        // Tambahkan ke modal detail
+        const orderDetailsContent = document.getElementById('orderDetailsContent');
+        
+        // Cek apakah elemen bukti pembayaran sudah ada
+        let paymentProofElement = document.getElementById('paymentProofDetails');
+        if (!paymentProofElement) {
+            // Buat elemen baru jika belum ada
+            paymentProofElement = document.createElement('p');
+            paymentProofElement.id = 'paymentProofDetails';
+            paymentProofElement.innerHTML = `<strong>Bukti Pembayaran:</strong> <span></span>`;
             
-            if (order) {
-                document.getElementById('orderNumberDetails').textContent = order['Order Number'];
-                document.getElementById('orderDateDetails').textContent = order.Tanggal;
-                document.getElementById('customerNameDetails').textContent = order['Nama Pelanggan'];
-                document.getElementById('customerNumberDetails').textContent = order['Nomor Telepon'];
-                document.getElementById('customerAddressDetails').textContent = order.Alamat;
-                document.getElementById('paymentMethodDetails').textContent = order['Metode Pembayaran'];
-                document.getElementById('statusDetails').textContent = order.Status;
-                
-                const itemsList = document.getElementById('orderItemsList');
-                itemsList.innerHTML = '';
-                order.Items.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = `${item.name} x${item.quantity} (Rp${item.price.toLocaleString('id-ID')}) - Total: Rp${(item.price * item.quantity).toLocaleString('id-ID')}`;
-                    itemsList.appendChild(li);
-                });
-                
-                document.getElementById('orderDetailsModal').style.display = 'flex';
-            } else {
-                alert("Detail pesanan tidak ditemukan.");
-            }
+            // Sisipkan setelah metode pembayaran
+            const paymentMethodElement = document.getElementById('paymentMethodDetails').parentElement;
+            paymentMethodElement.insertAdjacentElement('afterend', paymentProofElement);
         }
-
+        
+        // Update konten bukti pembayaran
+        paymentProofElement.querySelector('span').innerHTML = paymentProofHtml;
+        
+        const itemsList = document.getElementById('orderItemsList');
+        itemsList.innerHTML = '';
+        order.Items.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.name} x${item.quantity} (Rp${item.price.toLocaleString('id-ID')}) - Total: Rp${(item.price * item.quantity).toLocaleString('id-ID')}`;
+            itemsList.appendChild(li);
+        });
+        
+        document.getElementById('orderDetailsModal').style.display = 'flex';
+    } else {
+        alert("Detail pesanan tidak ditemukan.");
+    }
+}
         async function updateStatus(orderNumber, status) {
             if (!status) return;
             showLoading();
