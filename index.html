@@ -39,20 +39,162 @@
         .copy-feedback.show:after {
             opacity: 1;
         }
+        
+        /* Notifikasi Popup yang Diperbaiki */
+        .notification-container {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+        
+        .notification-item {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            transform: translateX(400px);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 4px solid #10b981;
+        }
+        
+        .notification-item.show {
+            transform: translateX(0);
+        }
+        
+        .notification-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        
+        .notification-content {
+            flex-grow: 1;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+        
+        .notification-message {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+        
+        .notification-time {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+        }
+        
+        .notification-close:hover {
+            color: #6b7280;
+        }
+        
+        /* Animasi untuk notifikasi yang masuk */
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Animasi untuk notifikasi yang keluar */
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        
+        .notification-item.slide-in {
+            animation: slideIn 0.5s forwards;
+        }
+        
+        .notification-item.slide-out {
+            animation: slideOut 0.5s forwards;
+        }
+        
+        /* Badge untuk jumlah pembelian */
+        .purchase-badge {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #ef4444;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+        
+        .purchase-badge i {
+            margin-right: 8px;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
     </style>
     
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
-    <!-- Notifikasi Popup -->
-    <div id="notification-popup" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-[70]">
-        <div class="flex items-center">
-            <i class="fas fa-bell mr-2"></i>
-            <div>
-                <p class="font-bold">Pesanan Baru!</p>
-                <p id="notification-message" class="text-sm"></p>
-            </div>
-        </div>
+    <!-- Badge untuk jumlah pembelian -->
+    <div id="purchase-badge" class="purchase-badge pulse">
+        <i class="fas fa-shopping-bag"></i>
+        <span id="purchase-count">0</span> pembelian hari ini
     </div>
+
+    <!-- Notifikasi Popup yang Diperbaiki -->
+    <div id="notification-container" class="notification-container"></div>
 
     <main class="flex-1 p-4 md:p-8">
         <header class="flex flex-col items-center mb-6 text-center">
@@ -244,6 +386,8 @@
         let cart = {};
         let selectedVariantId = null; // Menyimpan ID produk utama yang variannya sedang dipilih
         let lastOrderCount = 0; // Menyimpan jumlah pesanan terakhir
+        let todayOrderCount = 0; // Menyimpan jumlah pesanan hari ini
+        let notifications = []; // Menyimpan notifikasi yang aktif
 
         const currencyFormatter = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
         
@@ -292,6 +436,11 @@
         const variantOptionsContainer = document.getElementById('variant-options');
         const closeVariantModalButton = document.getElementById('close-variant-modal');
         const addVariantToCartButton = document.getElementById('add-variant-to-cart');
+
+        // Elemen Notifikasi
+        const notificationContainer = document.getElementById('notification-container');
+        const purchaseBadge = document.getElementById('purchase-badge');
+        const purchaseCount = document.getElementById('purchase-count');
 
         // --- FUNGSI CORE ---
 
@@ -784,8 +933,6 @@
             });
         });
         
-        // ... [Listener lainnya seperti cartIcon, closeCart, checkoutButton, closeCheckoutButton, modalClose] ...
-
         cartIconButton.addEventListener('click', () => { cartSidebar.classList.remove('translate-x-full'); });
         closeCartButton.addEventListener('click', () => { cartSidebar.classList.add('translate-x-full'); });
         checkoutButton.addEventListener('click', () => {
@@ -906,39 +1053,162 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
             }
         }
         
-        // --- FUNGSI NOTIFIKASI POPUP ---
+        // --- FUNGSI NOTIFIKASI POPUP YANG DIPERBAIKI ---
         
-        function showNotificationPopup(customerName, dayName, dateStr, timeStr) {
-            const notificationPopup = document.getElementById('notification-popup');
-            const notificationMessage = document.getElementById('notification-message');
+        function showNotificationPopup(customerName, productName, dayName, dateStr, timeStr) {
+            const notificationId = 'notification-' + Date.now();
             
-            notificationMessage.textContent = `${customerName} telah memesan pada hari ${dayName} tanggal ${dateStr} pukul ${timeStr}`;
+            // Buat elemen notifikasi baru
+            const notificationItem = document.createElement('div');
+            notificationItem.id = notificationId;
+            notificationItem.className = 'notification-item';
             
-            // Tampilkan popup
-            notificationPopup.classList.remove('translate-x-full');
+            // Generate avatar acak untuk pelanggan
+            const avatarSeed = customerName.replace(/\s/g, '').toLowerCase();
+            const avatarUrl = `https://picsum.photos/seed/${avatarSeed}/50/50.jpg`;
             
-            // Sembunyikan popup setelah 5 detik
+            notificationItem.innerHTML = `
+                <div class="notification-avatar">
+                    <img src="${avatarUrl}" alt="${customerName}" class="w-full h-full object-cover">
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">
+                        <strong>${customerName}</strong> baru saja membeli
+                    </div>
+                    <div class="notification-message">
+                        ${productName}
+                    </div>
+                    <div class="notification-time">
+                        ${dayName}, ${dateStr} pukul ${timeStr}
+                    </div>
+                </div>
+                <button class="notification-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Tambahkan notifikasi ke container
+            notificationContainer.appendChild(notificationItem);
+            
+            // Tambahkan ke array notifikasi aktif
+            notifications.push({
+                id: notificationId,
+                element: notificationItem,
+                timeout: null
+            });
+            
+            // Tampilkan notifikasi dengan animasi
             setTimeout(() => {
-                notificationPopup.classList.add('translate-x-full');
-            }, 5000);
+                notificationItem.classList.add('show');
+            }, 100);
+            
+            // Tambahkan event listener untuk tombol tutup
+            const closeButton = notificationItem.querySelector('.notification-close');
+            closeButton.addEventListener('click', () => {
+                removeNotification(notificationId);
+            });
+            
+            // Atur timeout untuk menghapus notifikasi setelah 7 detik
+            const timeout = setTimeout(() => {
+                removeNotification(notificationId);
+            }, 7000);
+            
+            // Simpan timeout ke array notifikasi
+            const notification = notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.timeout = timeout;
+            }
+            
+            // Batasi jumlah notifikasi yang ditampilkan
+            if (notifications.length > 3) {
+                removeNotification(notifications[0].id);
+            }
         }
-
+        
+        function removeNotification(notificationId) {
+            const notificationIndex = notifications.findIndex(n => n.id === notificationId);
+            if (notificationIndex === -1) return;
+            
+            const notification = notifications[notificationIndex];
+            
+            // Hapus timeout jika ada
+            if (notification.timeout) {
+                clearTimeout(notification.timeout);
+            }
+            
+            // Tambahkan animasi keluar
+            notification.element.classList.add('slide-out');
+            
+            // Hapus notifikasi setelah animasi selesai
+            setTimeout(() => {
+                if (notification.element.parentNode) {
+                    notification.element.parentNode.removeChild(notification.element);
+                }
+            }, 500);
+            
+            // Hapus dari array
+            notifications.splice(notificationIndex, 1);
+        }
+        
+        function updatePurchaseBadge(count) {
+            purchaseCount.textContent = count;
+            
+            // Tambahkan efek pulse jika ada pembelian baru
+            if (count > todayOrderCount) {
+                purchaseBadge.classList.add('pulse');
+                setTimeout(() => {
+                    purchaseBadge.classList.remove('pulse');
+                }, 2000);
+            }
+            
+            todayOrderCount = count;
+        }
+        
         function checkForNewOrders() {
             fetch("https://script.google.com/macros/s/AKfycbzPsZGLIA1MOLMmc_63mFcNHmoCVALlCBtZ6PuV5gPYfss3VAjBKvAnYJceHbAOXkNK/exec?action=getOrders")
             .then(response => response.json())
             .then(data => {
                 if (data.length > lastOrderCount) {
                     // Ada pesanan baru
-                    const newOrder = data[0]; // Pesanan terbaru
-                    const orderDate = new Date(newOrder.Tanggal);
-                    const dayName = orderDate.toLocaleDateString('id-ID', { weekday: 'long' });
-                    const dateStr = orderDate.toLocaleDateString('id-ID');
-                    const timeStr = orderDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    const newOrders = data.slice(0, data.length - lastOrderCount);
                     
-                    showNotificationPopup(newOrder["Nama Pelanggan"], dayName, dateStr, timeStr);
+                    // Proses setiap pesanan baru
+                    newOrders.forEach(order => {
+                        const orderDate = new Date(order.Tanggal);
+                        const dayName = orderDate.toLocaleDateString('id-ID', { weekday: 'long' });
+                        const dateStr = orderDate.toLocaleDateString('id-ID');
+                        const timeStr = orderDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                        
+                        // Dapatkan nama produk dari pesanan
+                        let productName = "beberapa produk";
+                        if (order.items && order.items.length > 0) {
+                            if (order.items.length === 1) {
+                                productName = order.items[0].name;
+                            } else {
+                                productName = `${order.items.length} produk`;
+                            }
+                        }
+                        
+                        // Tampilkan notifikasi
+                        showNotificationPopup(
+                            order["Nama Pelanggan"], 
+                            productName,
+                            dayName, 
+                            dateStr, 
+                            timeStr
+                        );
+                    });
                     
                     // Update lastOrderCount
                     lastOrderCount = data.length;
+                    
+                    // Update badge pembelian hari ini
+                    const today = new Date();
+                    const todayOrders = data.filter(order => {
+                        const orderDate = new Date(order.Tanggal);
+                        return orderDate.toDateString() === today.toDateString();
+                    });
+                    updatePurchaseBadge(todayOrders.length);
                 }
             })
             .catch(error => {
@@ -969,6 +1239,14 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
                 .then(response => response.json())
                 .then(data => {
                     lastOrderCount = data.length;
+                    
+                    // Update badge pembelian hari ini
+                    const today = new Date();
+                    const todayOrders = data.filter(order => {
+                        const orderDate = new Date(order.Tanggal);
+                        return orderDate.toDateString() === today.toDateString();
+                    });
+                    updatePurchaseBadge(todayOrders.length);
                 })
                 .catch(error => {
                     console.error("Error fetching initial order count:", error);
