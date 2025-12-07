@@ -780,6 +780,8 @@
             cartSidebar.classList.add('translate-x-full');
             checkoutSidebar.classList.remove('translate-x-full');
             renderOrderSummary();
+            // Load customer data when checkout is opened
+            loadCustomerData();
         });
         closeCheckoutButton.addEventListener('click', () => {
             checkoutSidebar.classList.add('translate-x-full');
@@ -865,6 +867,31 @@ Metode Pembayaran: ${orderDetails.paymentMethod}${paymentProof}
  ${trackingLink}`;
 
             return encodeURIComponent(message);
+        }
+        
+        // --- FUNGSI UNTUK MENYIMPAN DAN MEMUAT DATA PELANGGAN ---
+        
+        function saveCustomerData() {
+            const customerData = {
+                name: document.getElementById('customerName').value,
+                number: document.getElementById('customerNumber').value,
+                address: document.getElementById('customerAddress').value
+            };
+            localStorage.setItem('balanjaCustomerData', JSON.stringify(customerData));
+        }
+
+        function loadCustomerData() {
+            const savedData = localStorage.getItem('balanjaCustomerData');
+            if (savedData) {
+                try {
+                    const customerData = JSON.parse(savedData);
+                    document.getElementById('customerName').value = customerData.name || '';
+                    document.getElementById('customerNumber').value = customerData.number || '';
+                    document.getElementById('customerAddress').value = customerData.address || '';
+                } catch (e) {
+                    console.error("Failed to parse customer data from local storage", e);
+                }
+            }
         }
         
         // --- INITIALIZATION ---
