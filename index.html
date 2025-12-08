@@ -188,105 +188,6 @@
         .remove-preview:hover {
             background-color: rgba(239, 68, 68, 1);
         }
-        
-        /* Preview Gambar Produk - Baru */
-        .product-image {
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        
-        .product-image:hover {
-            transform: scale(1.05);
-        }
-        
-        .image-preview-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        
-        .image-preview-modal.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .image-preview-container {
-            position: relative;
-            max-width: 90%;
-            max-height: 90%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .image-preview-content {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-        
-        .image-preview-modal.show .image-preview-content {
-            transform: scale(1);
-        }
-        
-        .image-preview-close {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            transition: transform 0.2s ease;
-        }
-        
-        .image-preview-close:hover {
-            transform: scale(1.2);
-        }
-        
-        .image-preview-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            background: rgba(0, 0, 0, 0.5);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s ease;
-        }
-        
-        .image-preview-nav:hover {
-            background: rgba(0, 0, 0, 0.8);
-        }
-        
-        .image-preview-prev {
-            left: 20px;
-        }
-        
-        .image-preview-next {
-            right: 20px;
-        }
     </style>
     
 </head>
@@ -480,14 +381,6 @@
             <button id="modal-close" class="bg-gray-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-900 transition mt-4">Tutup</button>
         </div>
     </div>
-    
-    <!-- Modal Preview Gambar Produk - Baru -->
-    <div id="image-preview-modal" class="image-preview-modal">
-        <div class="image-preview-container">
-            <button id="image-preview-close" class="image-preview-close">&times;</button>
-            <img id="image-preview-content" class="image-preview-content" src="" alt="Product Preview">
-        </div>
-    </div>
 
     <footer class="mt-8 mb-20 text-center text-sm text-gray-400">
         © 2025 Balanja.co.id | All Rights Reserved | PT. UMKM
@@ -540,11 +433,6 @@
         const previewContainer = document.getElementById('preview-container');
         const previewImage = document.getElementById('preview-image');
         const removePreviewBtn = document.getElementById('remove-preview');
-        
-        // Elemen Modal Preview Gambar Produk - Baru
-        const imagePreviewModal = document.getElementById('image-preview-modal');
-        const imagePreviewContent = document.getElementById('image-preview-content');
-        const imagePreviewClose = document.getElementById('image-preview-close');
         
         // Elemen Modal
         const modal = document.getElementById('modal');
@@ -705,29 +593,6 @@
                     }
                 });
             });
-            
-            // Tambahkan event listener untuk gambar produk
-            document.querySelectorAll('.product-image').forEach(img => {
-                img.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openImagePreview(e.target.src);
-                });
-            });
-        }
-        
-        /**
-         * Membuka modal preview gambar produk
-         */
-        function openImagePreview(imageSrc) {
-            imagePreviewContent.src = imageSrc;
-            imagePreviewModal.classList.add('show');
-        }
-        
-        /**
-         * Menutup modal preview gambar produk
-         */
-        function closeImagePreview() {
-            imagePreviewModal.classList.remove('show');
         }
         
         /**
@@ -754,7 +619,7 @@
             productCard.className = 'product-card flex items-center p-4 bg-white rounded-xl shadow-md border border-gray-100';
             
             productCard.innerHTML = `
-                ${product.imageLink ? `<img src="${product.imageLink}" alt="${product.name}" class="product-image w-16 h-16 object-cover rounded-lg mr-4" loading="lazy">` : ''}
+                ${product.imageLink ? `<img src="${product.imageLink}" alt="${product.name}" class="w-16 h-16 object-cover rounded-lg mr-4" loading="lazy">` : ''}
                 <div class="flex-1">
                     <h3 class="font-semibold text-gray-800">${product.name}</h3>
                     <p class="text-lg font-bold text-gray-600">${currencyFormatter.format(displayPrice)} ${product.hasVariants ? `<span>+</span>` : ''}</p>
@@ -1045,21 +910,6 @@
             paymentProofFile.value = '';
             previewContainer.classList.remove('show');
         });
-        
-        // Event listener untuk modal preview gambar produk
-        imagePreviewClose.addEventListener('click', closeImagePreview);
-        imagePreviewModal.addEventListener('click', function(e) {
-            if (e.target === imagePreviewModal) {
-                closeImagePreview();
-            }
-        });
-        
-        // Event listener untuk menutup modal dengan tombol ESC
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && imagePreviewModal.classList.contains('show')) {
-                closeImagePreview();
-            }
-        });
 
         // Varian Modal Listeners
         closeVariantModalButton.addEventListener('click', () => { variantModal.classList.add('hidden'); });
@@ -1201,19 +1051,6 @@
             whatsappButton.classList.add('hidden');
         }
 
-function generateWhatsAppMessage(orderDetails) {
-    const items = orderDetails.items.map(item => `• ${item.name}${item.variantName ? ' (' + item.variantName + ')' : ''} x${item.quantity}`).join('\n');
-    const totalPrice = currencyFormatter.format(orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0));
-    const status = orderDetails.status || 'Menunggu Konfirmasi';
-    const paymentProof = orderDetails.paymentProofUrl && orderDetails.paymentProofUrl !== 'N/A' ? `\nBukti Transfer: ${orderDetails.paymentProofUrl}` : '';
-
-    const currentDomain = window.location.origin;
-    const path = window.location.pathname.replace(/\/[^/]*$/, ''); 
-    const trackingLink = `${currentDomain}${path}/StatusPesanan.html?kode=${orderDetails.orderNumber}`;
-
-    const message = `Halo Admin, saya telah membuat pesanan.
-*Nomor Pesanan:* ${orderDetails.orderNumber}
-Tanggal: ${new Date().toLocaleDateString
 function generateWhatsAppMessage(orderDetails) {
     const items = orderDetails.items.map(item => `• ${item.name}${item.variantName ? ' (' + item.variantName + ')' : ''} x${item.quantity}`).join('\n');
     const totalPrice = currencyFormatter.format(orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0));
