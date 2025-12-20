@@ -840,7 +840,7 @@
             showModal("Pemesanan Berhasil", message, true, orderNumber);
             
             const waMessage = generateWhatsAppMessage({ ...orderDetails, orderNumber: orderNumber, status: 'Menunggu Konfirmasi' });
-            const adminPhoneNumber = '6285793715450'; // Ganti dengan nomor WhatsApp admin toko
+            const adminPhoneNumber = '6285317199124'; // Ganti dengan nomor WhatsApp admin toko
             whatsappButton.href = `https://wa.me/${adminPhoneNumber}?text=${waMessage}`;
             whatsappButton.classList.remove('hidden');
             
