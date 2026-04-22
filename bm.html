@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BM Water — Penyedia Air Murni Bersih & Higienis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: #05080A; color: #fff; overflow-x: hidden; }
+
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(30px); filter: blur(8px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        .reveal { opacity: 0; }
+        .reveal.active { animation: reveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+        .reveal-d1.active { animation-delay: 0.1s; }
+        .reveal-d2.active { animation-delay: 0.2s; }
+        .reveal-d3.active { animation-delay: 0.3s; }
+        .reveal-d4.active { animation-delay: 0.4s; }
+        .reveal-d5.active { animation-delay: 0.5s; }
+        .reveal-d6.active { animation-delay: 0.6s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+        .float-anim { animation: float 4s ease-in-out infinite; }
+
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        .ripple-ring { animation: ripple 3s ease-out infinite; }
+        .ripple-ring-2 { animation: ripple 3s ease-out infinite 1s; }
+        .ripple-ring-3 { animation: ripple 3s ease-out infinite 2s; }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(239,68,68,0.15); }
+            50% { box-shadow: 0 0 40px rgba(239,68,68,0.3); }
+        }
+        .pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+
+        @keyframes marquee-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .marquee-track { animation: marquee-scroll 40s linear infinite; }
+        .marquee-track:hover { animation-play-state: paused; }
+
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spin-slow { animation: spin-slow 20s linear infinite; }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent 30%, rgba(239,68,68,0.08) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes stamp-in {
+            0% { transform: scale(2) rotate(-15deg); opacity: 0; }
+            60% { transform: scale(0.95) rotate(-12deg); opacity: 1; }
+            100% { transform: scale(1) rotate(-12deg); opacity: 1; }
+        }
+        .stamp-animate { animation: stamp-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+        .stamp-animate-d1 { animation-delay: 0.8s; }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #ef4444, #f87171, #fca5a5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .red-gradient {
+            background: linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.02) 50%, rgba(220,38,38,0.05) 100%);
+        }
+
+        .card-shadow {
+            box-shadow: 0 5.7px 8.6px rgba(0,0,0,0.07),
+                        0 13.7px 10.9px rgba(0,0,0,0.099),
+                        0 25.7px 20.5px rgba(0,0,0,0.123),
+                        0 45.8px 36.6px rgba(0,0,0,0.147);
+        }
+
+        .divider-line {
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+        }
+
+        .nav-blur {
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #05080A; }
+        ::-webkit-scrollbar-thumb { background: rgba(239,68,68,0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(239,68,68,0.5); }
+
+        .water-bubble {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(239,68,68,0.15);
+            background: rgba(239,68,68,0.03);
+        }
+
+        .hero-bg-pattern {
+            background-image: radial-gradient(rgba(239,68,68,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .product-glow {
+            box-shadow: 0 0 60px rgba(239,68,68,0.15), 0 0 120px rgba(239,68,68,0.05);
+        }
+
+        .product-card-hover:hover .product-img-wrapper {
+            transform: scale(1.03);
+        }
+
+        .tag-badge {
+            background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05));
+            border: 1px solid rgba(239,68,68,0.2);
+        }
+
+        .lab-table th {
+            background: rgba(239,68,68,0.06);
+        }
+        .lab-table tr:nth-child(even) td {
+            background: rgba(255,255,255,0.01);
+        }
+        .lab-table tr:hover td {
+            background: rgba(239,68,68,0.04);
+        }
+
+        .cert-frame {
+            border: 2px solid rgba(239,68,68,0.15);
+            background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+        }
+
+        .toast {
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        accent: '#ef4444',
+                        'accent-dark': '#dc2626',
+                        'accent-light': '#f87171',
+                        dark: { 50: '#15191E', 100: '#0E1216', 200: '#0B0F13', 300: '#080B0E', 400: '#05080A' }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        geist: ['Geist', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-inter">
+
+    <!-- ========== NAVIGATION ========== -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+        <div class="max-w-screen-2xl mx-auto px-6 sm:px-8">
+            <div class="grid grid-cols-12 items-center h-16 sm:h-20">
+                <div class="col-span-4 flex items-center gap-3">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center pulse-glow">
+                        <i data-lucide="droplets" class="w-4 h-4 sm:w-5 sm:h-5 text-accent"></i>
+                    </div>
+                    <span class="text-lg sm:text-xl font-semibold tracking-tight font-geist">BM <span class="text-accent">Water</span></span>
+                </div>
+                <div class="col-span-4 hidden lg:flex items-center justify-center gap-1">
+                    <a href="#beranda" class="nav-link px-3 xl:px-4 py-2 text-xs font-medium uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300">Beranda</a>
+                    <a href="#produk" class="nav-link px-3 xl:px-4 py-2 text-xs font-medium uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300">Produk</a>
+                    <a href="#lab" class="nav-link px-3 xl:px-4 py-2 text-xs font-medium uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300">Lab</a>
+                    <a href="#tentang" class="nav-link px-3 xl:px-4 py-2 text-xs font-medium uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300">Tentang</a>
+                    <a href="#mutu" class="nav-link px-3 xl:px-4 py-2 text-xs font-medium uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300">Mutu</a>
+                    <a href="#harga" class="nav-link px-3 xl:px-4 py-2 text-xs font-medium uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300">Harga</a>
+                </div>
+                <div class="col-span-8 lg:col-span-4 flex items-center justify-end gap-3">
+                    <a href="https://wa.me/6285793715450" target="_blank" class="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-accent text-white text-xs font-semibold uppercase tracking-widest rounded-lg hover:bg-accent-dark transition-all duration-300 shadow-lg shadow-accent/20">
+                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                        Hubungi Kami
+                    </a>
+                    <button id="mobile-menu-btn" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg border border-white/10 hover:bg-white/5 transition-all duration-300">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 z-40 pointer-events-none opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/80" onclick="closeMobileMenu()"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-72 bg-dark-100 border-l border-white/5 p-6 pt-24 transform translate-x-full transition-transform duration-400" id="mobile-menu-panel">
+            <div class="flex flex-col gap-2">
+                <a href="#beranda" onclick="closeMobileMenu()" class="px-4 py-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">Beranda</a>
+                <a href="#produk" onclick="closeMobileMenu()" class="px-4 py-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">Produk</a>
+                <a href="#lab" onclick="closeMobileMenu()" class="px-4 py-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">Hasil Lab</a>
+                <a href="#tentang" onclick="closeMobileMenu()" class="px-4 py-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">Tentang Kami</a>
+                <a href="#mutu" onclick="closeMobileMenu()" class="px-4 py-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">Standar Mutu</a>
+                <a href="#harga" onclick="closeMobileMenu()" class="px-4 py-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">Harga</a>
+                <div class="mt-4 pt-4 border-t border-white/5">
+                    <a href="https://wa.me/6285793715450" target="_blank" class="flex items-center justify-center gap-2 w-full px-5 py-3 bg-accent text-white text-xs font-semibold uppercase tracking-widest rounded-lg">
+                        <i data-lucide="message-circle" class="w-4 h-4"></i> Hubungi Kami
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== HERO SECTION ========== -->
+    <section id="beranda" class="relative min-h-screen flex items-center overflow-hidden">
+        <div class="absolute inset-0 hero-bg-pattern"></div>
+        <div class="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-red-900/5 rounded-full blur-[100px]"></div>
+        <div class="water-bubble w-3 h-3 top-[20%] left-[10%] float-anim"></div>
+        <div class="water-bubble w-2 h-2 top-[60%] left-[80%] float-anim" style="animation-delay:1s;"></div>
+        <div class="water-bubble w-4 h-4 top-[40%] left-[70%] float-anim" style="animation-delay:2s;"></div>
+        <div class="water-bubble w-2 h-2 top-[80%] left-[20%] float-anim" style="animation-delay:0.5s;"></div>
+        <div class="water-bubble w-3 h-3 top-[30%] left-[50%] float-anim" style="animation-delay:1.5s;"></div>
+
+        <div class="relative max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20 py-32 sm:py-40 lg:py-0 w-full">
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div class="space-y-8">
+                    <div class="reveal active">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-accent/20 bg-accent/5 mb-6">
+                            <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+                            <span class="text-[10px] font-semibold uppercase tracking-[0.15em] text-accent">Penyedia Air Murni Terpercaya</span>
+                        </div>
+                    </div>
+                    <h1 class="reveal active reveal-d1 text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-light leading-[1.08] tracking-tighter">
+                        Air Murni<br><span class="gradient-text font-normal">Bersih</span> &<br>Higienis
+                    </h1>
+                    <p class="reveal active reveal-d2 text-base sm:text-lg font-light text-white/60 leading-relaxed max-w-lg">
+                        BM Water menyediakan air murni berkualitas tinggi yang diproses melalui tahapan penyaringan dan pemurnian dengan standar kebersihan yang terjaga.
+                    </p>
+                    <div class="reveal active reveal-d3 flex flex-wrap gap-4">
+                        <a href="#produk" class="group flex items-center gap-3 px-7 py-3.5 bg-accent text-white text-xs font-semibold uppercase tracking-widest rounded-lg hover:bg-accent-dark hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 shadow-lg shadow-accent/20">
+                            Lihat Produk <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                        <a href="#lab" class="flex items-center gap-3 px-7 py-3.5 border border-white/10 text-white/80 text-xs font-semibold uppercase tracking-widest rounded-lg hover:bg-white/5 hover:border-white/20 transition-all duration-300">
+                            Hasil Lab
+                        </a>
+                    </div>
+                    <div class="reveal active reveal-d4 flex gap-8 sm:gap-12 pt-4">
+                        <div><div class="text-2xl sm:text-3xl font-light tracking-tight text-accent">100%</div><div class="text-[11px] uppercase tracking-widest text-white/40 mt-1">Air Murni</div></div>
+                        <div class="w-px bg-white/10"></div>
+                        <div><div class="text-2xl sm:text-3xl font-light tracking-tight text-accent">0</div><div class="text-[11px] uppercase tracking-widest text-white/40 mt-1">Bakteri</div></div>
+                        <div class="w-px bg-white/10"></div>
+                        <div><div class="text-2xl sm:text-3xl font-light tracking-tight">Gratis</div><div class="text-[11px] uppercase tracking-widest text-white/40 mt-1">Pengiriman</div></div>
+                    </div>
+                </div>
+                <div class="reveal active reveal-d3 relative flex items-center justify-center">
+                    <div class="relative w-72 h-72 sm:w-96 sm:h-96 lg:w-[440px] lg:h-[440px]">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="absolute w-full h-full rounded-full border border-accent/10 ripple-ring"></div>
+                            <div class="absolute w-full h-full rounded-full border border-accent/10 ripple-ring-2"></div>
+                            <div class="absolute w-full h-full rounded-full border border-accent/8 ripple-ring-3"></div>
+                        </div>
+                        <div class="absolute inset-12 sm:inset-16 rounded-full overflow-hidden border-2 border-accent/20 pulse-glow">
+                            <img src="https://picsum.photos/seed/cleanwater2024/600/600.jpg" alt="BM Water" class="w-full h-full object-cover" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-400/80 via-transparent to-transparent"></div>
+                        </div>
+                        <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-5 py-2.5 bg-dark-100/90 border border-accent/20 rounded-full backdrop-blur-md float-anim" style="animation-delay:1s;">
+                            <span class="text-xs font-semibold text-accent tracking-wide">Purified Water</span>
+                        </div>
+                        <div class="absolute top-8 -right-2 sm:top-12 sm:right-0 px-4 py-2 bg-dark-100/90 border border-white/10 rounded-lg backdrop-blur-md float-anim" style="animation-delay:2s;">
+                            <div class="flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-accent"></i><span class="text-[11px] font-medium text-white/80">Higienis</span></div>
+                        </div>
+                        <div class="absolute bottom-16 -left-2 sm:bottom-20 sm:left-0 px-4 py-2 bg-dark-100/90 border border-white/10 rounded-lg backdrop-blur-md float-anim" style="animation-delay:0.5s;">
+                            <div class="flex items-center gap-2"><i data-lucide="file-check" class="w-4 h-4 text-accent"></i><span class="text-[11px] font-medium text-white/80">Lab Tested</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
+            <span class="text-[10px] uppercase tracking-[0.2em]">Scroll</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 animate-bounce"></i>
+        </div>
+    </section>
+
+    <!-- ========== MARQUEE ========== -->
+    <section class="relative py-6 border-y border-white/5 overflow-hidden">
+        <div class="marquee-track flex items-center gap-12 whitespace-nowrap" style="width: max-content;">
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="droplet" class="w-3 h-3 text-accent/40"></i> Air Murni</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="shield-check" class="w-3 h-3 text-accent/40"></i> Higienis</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="flask-conical" class="w-3 h-3 text-accent/40"></i> Sterilisasi</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="truck" class="w-3 h-3 text-accent/40"></i> Gratis Pengiriman</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="badge-check" class="w-3 h-3 text-accent/40"></i> Berkualitas</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="file-check" class="w-3 h-3 text-accent/40"></i> Teruji Lab</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="heart" class="w-3 h-3 text-accent/40"></i> Sehat</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="clock" class="w-3 h-3 text-accent/40"></i> Tepat Waktu</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="droplet" class="w-3 h-3 text-accent/40"></i> Air Murni</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="shield-check" class="w-3 h-3 text-accent/40"></i> Higienis</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="flask-conical" class="w-3 h-3 text-accent/40"></i> Sterilisasi</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="truck" class="w-3 h-3 text-accent/40"></i> Gratis Pengiriman</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="badge-check" class="w-3 h-3 text-accent/40"></i> Berkualitas</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="file-check" class="w-3 h-3 text-accent/40"></i> Teruji Lab</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="heart" class="w-3 h-3 text-accent/40"></i> Sehat</span>
+            <span class="text-xs uppercase tracking-[0.2em] text-white/20 flex items-center gap-3"><i data-lucide="clock" class="w-3 h-3 text-accent/40"></i> Tepat Waktu</span>
+        </div>
+    </section>
+
+    <!-- ========== PRODUCT SHOWCASE ========== -->
+    <section id="produk" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-accent/4 rounded-full blur-[150px]"></div>
+        <div class="relative max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20">
+            <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
+                <span class="reveal text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">Produk Kami</span>
+                <h2 class="reveal reveal-d1 text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter leading-[1.1] mt-4">
+                    Air Murni <span class="text-accent">Galon BM Water</span>
+                </h2>
+                <p class="reveal reveal-d2 text-base font-light text-white/50 leading-relaxed mt-5">
+                    Produk unggulan kami dalam kemasan galon yang bersih, aman, dan siap digunakan untuk berbagai kebutuhan dapur dan konsumsi.
+                </p>
+            </div>
+            <div class="reveal grid lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-16">
+                <div class="product-card-hover relative">
+                    <div class="relative rounded-2xl overflow-hidden bg-white/[0.02] border border-accent/10 product-glow">
+                        <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full border border-dashed border-accent/10 spin-slow"></div>
+                        <div class="absolute -bottom-12 -left-12 w-36 h-36 rounded-full border border-dashed border-accent/8 spin-slow" style="animation-direction:reverse;"></div>
+                        <div class="product-img-wrapper transition-transform duration-700 relative">
+                            <img src="https://i.imgur.com/6POcmce.png" alt="Galon BM Water" class="w-full h-[400px] sm:h-[500px] object-cover" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-400 via-dark-400/30 to-transparent"></div>
+                            <div class="absolute top-6 left-6"><div class="tag-badge px-4 py-2 rounded-full"><span class="text-[10px] font-bold uppercase tracking-[0.15em] text-accent">Best Seller</span></div></div>
+                            <div class="absolute top-6 right-6"><div class="w-12 h-12 rounded-full bg-accent flex items-center justify-center shadow-lg shadow-accent/30"><i data-lucide="droplets" class="w-6 h-6 text-white"></i></div></div>
+                            <div class="absolute bottom-0 left-0 right-0 p-8"><h3 class="text-2xl font-medium mb-2">Galon Air Murni</h3><p class="text-sm text-white/50 font-light">BM Water — Purified Water</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="space-y-4">
+                        <h3 class="reveal text-2xl sm:text-3xl font-light tracking-tight">Spesifikasi Produk</h3>
+                        <p class="reveal reveal-d1 text-sm font-light text-white/50 leading-relaxed">Air murni (purified water) yang telah melalui proses pemurnian bertingkat, dikemas dalam galon bersih dan higienis, siap langsung digunakan untuk memasak, minum, dan kebutuhan dapur lainnya.</p>
+                    </div>
+                    <div class="reveal reveal-d2 grid grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5"><div class="flex items-center gap-2 mb-2"><i data-lucide="package" class="w-4 h-4 text-accent"></i><span class="text-[10px] uppercase tracking-widest text-white/40">Kemasan</span></div><span class="text-sm font-medium">Galon 19 Liter</span></div>
+                        <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5"><div class="flex items-center gap-2 mb-2"><i data-lucide="flask-conical" class="w-4 h-4 text-accent"></i><span class="text-[10px] uppercase tracking-widest text-white/40">Jenis</span></div><span class="text-sm font-medium">Purified Water</span></div>
+                        <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5"><div class="flex items-center gap-2 mb-2"><i data-lucide="thermometer" class="w-4 h-4 text-accent"></i><span class="text-[10px] uppercase tracking-widest text-white/40">Suhu</span></div><span class="text-sm font-medium">Suhu Ruang</span></div>
+                        <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5"><div class="flex items-center gap-2 mb-2"><i data-lucide="calendar" class="w-4 h-4 text-accent"></i><span class="text-[10px] uppercase tracking-widest text-white/40">Daya Tahan</span></div><span class="text-sm font-medium">Maks. 2 Minggu</span></div>
+                    </div>
+                    <div class="reveal reveal-d3 space-y-3">
+                        <div class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0"><i data-lucide="check" class="w-3.5 h-3.5 text-accent"></i></div><span class="text-sm text-white/70 font-light">Galon dipinjamkan gratis oleh BM Water</span></div>
+                        <div class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0"><i data-lucide="check" class="w-3.5 h-3.5 text-accent"></i></div><span class="text-sm text-white/70 font-light">Galon dicuci dan disterilisasi sebelum pengisian</span></div>
+                        <div class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0"><i data-lucide="check" class="w-3.5 h-3.5 text-accent"></i></div><span class="text-sm text-white/70 font-light">Tutup galon kedap udara, menjaga kebersihan</span></div>
+                        <div class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0"><i data-lucide="check" class="w-3.5 h-3.5 text-accent"></i></div><span class="text-sm text-white/70 font-light">Cocok untuk dispenser standar</span></div>
+                    </div>
+                    <div class="reveal reveal-d4 flex flex-wrap items-center gap-4 pt-2">
+                        <div><div class="text-[10px] uppercase tracking-widest text-white/40 mb-1">Harga per Galon</div><div class="flex items-baseline gap-1"><span class="text-sm text-white/50">Rp</span><span class="text-4xl font-light text-accent tracking-tight">10.000</span></div></div>
+                        <a href="https://wa.me/6285793715450?text=Halo%20BM%20Water%2C%20saya%20ingin%20memesan%20galon%20air%20murni." target="_blank" class="group flex items-center gap-3 px-6 py-3.5 bg-accent text-white text-xs font-semibold uppercase tracking-widest rounded-lg hover:bg-accent-dark hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 shadow-lg shadow-accent/20">Pesan Galon <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="reveal grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="group relative p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/15 hover:bg-white/[0.04] transition-all duration-300 overflow-hidden"><div class="absolute inset-0 shimmer"></div><div class="relative"><div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"><i data-lucide="chef-hat" class="w-5 h-5 text-accent"></i></div><h4 class="text-sm font-medium mb-2">Memasak</h4><p class="text-xs text-white/40 font-light leading-relaxed">Air murni untuk merebus, mengukus, dan semua proses memasak</p></div></div>
+                <div class="group relative p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/15 hover:bg-white/[0.04] transition-all duration-300 overflow-hidden"><div class="absolute inset-0 shimmer" style="animation-delay:0.5s;"></div><div class="relative"><div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"><i data-lucide="glass-water" class="w-5 h-5 text-accent"></i></div><h4 class="text-sm font-medium mb-2">Minum Langsung</h4><p class="text-xs text-white/40 font-light leading-relaxed">Aman dikonsumsi langsung tanpa perlu dimasak terlebih dahulu</p></div></div>
+                <div class="group relative p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/15 hover:bg-white/[0.04] transition-all duration-300 overflow-hidden"><div class="absolute inset-0 shimmer" style="animation-delay:1s;"></div><div class="relative"><div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"><i data-lucide="coffee" class="w-5 h-5 text-accent"></i></div><h4 class="text-sm font-medium mb-2">Minuman & Kopi</h4><p class="text-xs text-white/40 font-light leading-relaxed">Menghasilkan minuman dengan rasa yang murni dan tidak tercampur</p></div></div>
+                <div class="group relative p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/15 hover:bg-white/[0.04] transition-all duration-300 overflow-hidden"><div class="absolute inset-0 shimmer" style="animation-delay:1.5s;"></div><div class="relative"><div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"><i data-lucide="spray-can" class="w-5 h-5 text-accent"></i></div><h4 class="text-sm font-medium mb-2">Keperluan Dapur</h4><p class="text-xs text-white/40 font-light leading-relaxed">Cuci bahan makanan, peralatan dapur, dan kebutuhan sanitasi lainnya</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20"><div class="divider-line h-px"></div></div>
+
+    <!-- ========== LAB RESULTS SECTION ========== -->
+    <section id="lab" class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute top-0 right-0 w-[700px] h-[700px] bg-accent/3 rounded-full blur-[150px]"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-red-900/5 rounded-full blur-[120px]"></div>
+
+        <div class="relative max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20">
+            <!-- Section Header -->
+            <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
+                <div class="reveal inline-flex items-center gap-2 px-4 py-2 rounded-full border border-accent/20 bg-accent/5 mb-6">
+                    <i data-lucide="file-check" class="w-3.5 h-3.5 text-accent"></i>
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.15em] text-accent">Terverifikasi</span>
+                </div>
+                <h2 class="reveal reveal-d1 text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter leading-[1.1] mt-4">
+                    Hasil Uji <span class="text-accent">Laboratorium</span>
+                </h2>
+                <p class="reveal reveal-d2 text-base font-light text-white/50 leading-relaxed mt-5">
+                    Air BM Water telah diuji di laboratorium terakreditasi dan memenuhi standar mutu air minum sesuai regulasi yang berlaku di Indonesia.
+                </p>
+            </div>
+
+            <!-- Lab Certificate Display -->
+            <div class="reveal grid lg:grid-cols-5 gap-8 lg:gap-10 mb-16">
+                <!-- Certificate Image Area (2 col) -->
+                <div class="lg:col-span-2">
+                    <div class="relative">
+                        <div class="cert-frame rounded-2xl p-3 card-shadow">
+                            <div class="relative rounded-xl overflow-hidden bg-dark-200">
+                                <!-- Placeholder untuk gambar sertifikat lab asli -->
+                                <img src="https://picsum.photos/seed/labcert2026/600/850.jpg" alt="Sertifikat Hasil Lab BM Water" class="w-full h-[500px] sm:h-[600px] object-cover" />
+                                <div class="absolute inset-0 bg-gradient-to-t from-dark-400 via-dark-400/50 to-transparent"></div>
+                                <!-- Overlay Info -->
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <div class="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-4">
+                                        <i data-lucide="file-badge" class="w-8 h-8 text-accent"></i>
+                                    </div>
+                                    <h4 class="text-lg font-medium mb-2">Sertifikat Hasil Uji Lab</h4>
+                                    <p class="text-xs text-white/40 text-center max-w-[200px]">Ganti gambar ini dengan foto sertifikat lab asli BM Water</p>
+                                </div>
+                                <!-- Bottom Info -->
+                                <div class="absolute bottom-0 left-0 right-0 p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <div class="text-[10px] uppercase tracking-widest text-white/40 mb-1">No. Sertifikat</div>
+                                            <div class="text-sm font-medium">LAB/2026/BMW-001</div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-[10px] uppercase tracking-widest text-white/40 mb-1">Tanggal Uji</div>
+                                            <div class="text-sm font-medium">15 Januari 2026</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Stamp Badge -->
+                        <div class="absolute -top-4 -right-4 sm:top-4 sm:-right-4">
+                            <div class="stamp-animate relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-accent/10 border-[3px] border-accent/40 flex items-center justify-center -rotate-12">
+                                <div class="text-center">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5 sm:w-6 sm:h-6 text-accent mx-auto mb-0.5"></i>
+                                    <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-accent leading-tight">Memenuhi<br>Standar</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Instruction -->
+                        <div class="mt-4 p-4 rounded-xl bg-accent/5 border border-accent/10">
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="info" class="w-4 h-4 text-accent mt-0.5 flex-shrink-0"></i>
+                                <p class="text-[11px] text-white/50 leading-relaxed">Area ini disediakan untuk menampilkan foto sertifikat hasil uji laboratorium asli. Ganti gambar placeholder di atas dengan scan/foto sertifikat resmi dari lab terakreditasi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lab Results Table (3 col) -->
+                <div class="lg:col-span-3 space-y-6">
+                    <!-- Lab Info Bar -->
+                    <div class="reveal reveal-d1 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div class="text-[10px] uppercase tracking-widest text-white/30 mb-1">Laboratorium</div>
+                            <div class="text-xs font-medium text-white/80">Lab Terakreditasi</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div class="text-[10px] uppercase tracking-widest text-white/30 mb-1">Acuan</div>
+                            <div class="text-xs font-medium text-white/80">Permenkes 492/2010</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div class="text-[10px] uppercase tracking-widest text-white/30 mb-1">Sampel</div>
+                            <div class="text-xs font-medium text-white/80">Air Murni BM Water</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div class="text-[10px] uppercase tracking-widest text-white/30 mb-1">Status</div>
+                            <div class="text-xs font-semibold text-accent flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span>MENUHI SYARAT</div>
+                        </div>
+                    </div>
+
+                    <!-- Table: Uji Fisik -->
+                    <div class="reveal reveal-d2 rounded-2xl border border-white/5 overflow-hidden card-shadow">
+                        <div class="px-6 py-4 bg-accent/5 border-b border-white/5 flex items-center gap-3">
+                            <i data-lucide="eye" class="w-4 h-4 text-accent"></i>
+                            <h4 class="text-sm font-semibold">Uji Fisik</h4>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="lab-table w-full text-sm">
+                                <thead>
+                                    <tr class="text-left">
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Parameter</th>
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Standar</th>
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Hasil</th>
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="font-light">
+                                    <tr><td class="px-6 py-3.5 text-white/70 border-b border-white/5">Warna</td><td class="px-6 py-3.5 text-white/50 border-b border-white/5">Tidak berwarna</td><td class="px-6 py-3.5 text-white/70 border-b border-white/5">Tidak berwarna</td><td class="px-6 py-3.5 border-b border-white/5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                    <tr><td class="px-6 py-3.5 text-white/70 border-b border-white/5">Bau</td><td class="px-6 py-3.5 text-white/50 border-b border-white/5">Tidak berbau</td><td class="px-6 py-3.5 text-white/70 border-b border-white/5">Tidak berbau</td><td class="px-6 py-3.5 border-b border-white/5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                    <tr><td class="px-6 py-3.5 text-white/70 border-b border-white/5">Rasa</td><td class="px-6 py-3.5 text-white/50 border-b border-white/5">Tidak berasa</td><td class="px-6 py-3.5 text-white/70 border-b border-white/5">Tidak berasa</td><td class="px-6 py-3.5 border-b border-white/5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                    <tr><td class="px-6 py-3.5 text-white/70">Kekeruhan (NTU)</td><td class="px-6 py-3.5 text-white/50">Maks. 5</td><td class="px-6 py-3.5 text-white/70">&lt; 0.1</td><td class="px-6 py-3.5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Table: Uji Kimia -->
+                    <div class="reveal reveal-d3 rounded-2xl border border-white/5 overflow-hidden card-shadow">
+                        <div class="px-6 py-4 bg-accent/5 border-b border-white/5 flex items-center gap-3">
+                            <i data-lucide="flask-conical" class="w-4 h-4 text-accent"></i>
+                            <h4 class="text-sm font-semibold">Uji Kimia</h4>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="lab-table w-full text-sm">
+                                <thead>
+                                    <tr class="text-left">
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Parameter</th>
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Standar</th>
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Hasil</th>
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="font-light">
+                                    <tr><td class="px-6 py-3.5 text-white/70 border-b border-white/5">pH</td><td class="px-6 py-3.5 text-white/50 border-b border-white/5">6.5 — 8.5</td><td class="px-6 py-3.5 text-white/70 border-b border-white/5">7.2</td><td class="px-6 py-3.5 border-b border-white/5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                    <tr><td class="px-6 py-3.5 text-white/70 border-b border-white/5">TDS (mg/L)</td><td class="px-6 py-3.5 text-white/50 border-b border-white/5">Maks. 500</td><td class="px-6 py-3.5 text-white/70 border-b border-white/5">3</td><td class="px-6 py-3.5 border-b border-white/5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                    <tr><td class="px-6 py-3.5 text-white/70 border-b border-white/5">Logam Berat (Pb) mg/L</td><td class="px-6 py-3.5 text-white/50 border-b border-white/5">Maks. 0.01</td><td class="px-6 py-3.5 text-white/70 border-b border-white/5">&lt; 0.001</td><td class="px-6 py-3.5 border-b border-white/5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                    <tr><td class="px-6 py-3.5 text-white/70 border-b border-white/5">Logam Berat (Cd) mg/L</td><td class="px-6 py-3.5 text-white/50 border-b border-white/5">Maks. 0.003</td><td class="px-6 py-3.5 text-white/70 border-b border-white/5">&lt; 0.001</td><td class="px-6 py-3.5 border-b border-white/5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                    <tr><td class="px-6 py-3.5 text-white/70 border-b border-white/5">Logam Berat (Hg) mg/L</td><td class="px-6 py-3.5 text-white/50 border-b border-white/5">Maks. 0.001</td><td class="px-6 py-3.5 text-white/70 border-b border-white/5">&lt; 0.0005</td><td class="px-6 py-3.5 border-b border-white/5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                    <tr><td class="px-6 py-3.5 text-white/70">Nitrat (mg/L)</td><td class="px-6 py-3.5 text-white/50">Maks. 50</td><td class="px-6 py-3.5 text-white/70">&lt; 1</td><td class="px-6 py-3.5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Table: Uji Mikrobiologi -->
+                    <div class="reveal reveal-d4 rounded-2xl border border-white/5 overflow-hidden card-shadow">
+                        <div class="px-6 py-4 bg-accent/5 border-b border-white/5 flex items-center gap-3">
+                            <i data-lucide="microscope" class="w-4 h-4 text-accent"></i>
+                            <h4 class="text-sm font-semibold">Uji Mikrobiologi</h4>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="lab-table w-full text-sm">
+                                <thead>
+                                    <tr class="text-left">
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Parameter</th>
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Standar</th>
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Hasil</th>
+                                        <th class="px-6 py-3 text-[10px] uppercase tracking-widest text-white/40 font-semibold border-b border-white/5">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="font-light">
+                                    <tr><td class="px-6 py-3.5 text-white/70 border-b border-white/5">Total Coliform (MPN/100mL)</td><td class="px-6 py-3.5 text-white/50 border-b border-white/5">Maks. 10</td><td class="px-6 py-3.5 text-white/70 border-b border-white/5">&lt; 2</td><td class="px-6 py-3.5 border-b border-white/5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                    <tr><td class="px-6 py-3.5 text-white/70 border-b border-white/5">E. Coli (MPN/100mL)</td><td class="px-6 py-3.5 text-white/50 border-b border-white/5">0 (tidak boleh ada)</td><td class="px-6 py-3.5 text-white/70 border-b border-white/5">0</td><td class="px-6 py-3.5 border-b border-white/5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                    <tr><td class="px-6 py-3.5 text-white/70">Total Plate Count (koloni/mL)</td><td class="px-6 py-3.5 text-white/50">Maks. 100</td><td class="px-6 py-3.5 text-white/70">&lt; 5</td><td class="px-6 py-3.5"><span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-green-400 uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>Lolos</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Summary Conclusion -->
+                    <div class="reveal reveal-d5 p-6 rounded-2xl bg-gradient-to-r from-accent/5 via-accent/3 to-transparent border border-accent/15">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="shield-check" class="w-6 h-6 text-accent"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold mb-2">Kesimpulan Hasil Uji</h4>
+                                <p class="text-xs text-white/50 leading-relaxed">
+                                    Berdasarkan hasil pengujian laboratorium, <strong class="text-white/80">seluruh parameter uji fisik, kimia, dan mikrobiologi air murni BM Water</strong> memenuhi persyaratan mutu air minum sesuai Peraturan Menteri Kesehatan Republik Indonesia Nomor 492 Tahun 2010 tentang Persyaratan Kualitas Air Minum. Produk dinyatakan <strong class="text-accent">MEMENUHI SYARAT</strong> dan layak dikonsumsi.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Note about replacing data -->
+            <div class="reveal max-w-3xl mx-auto">
+                <div class="p-6 rounded-2xl border border-dashed border-white/10 bg-white/[0.01] text-center">
+                    <div class="flex items-center justify-center gap-2 mb-3">
+                        <i data-lucide="alert-circle" class="w-4 h-4 text-accent/60"></i>
+                        <span class="text-[10px] font-semibold uppercase tracking-widest text-accent/60">Catatan Penting</span>
+                    </div>
+                    <p class="text-xs text-white/30 leading-relaxed max-w-xl mx-auto">
+                        Data hasil uji di atas merupakan contoh format tampilan. Silakan ganti seluruh data tabel (nama laboratorium, nomor sertifikat, tanggal, nilai hasil uji) dan gambar sertifikat dengan data hasil laboratorium asli BM Water. Hubungi pengembang web untuk memperbarui konten ini.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20"><div class="divider-line h-px"></div></div>
+
+    <!-- ========== ABOUT SECTION ========== -->
+    <section id="tentang" class="relative py-24 sm:py-32">
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/3 rounded-full blur-[120px]"></div>
+        <div class="relative max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20">
+            <div class="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+                <div class="reveal relative">
+                    <div class="relative rounded-2xl overflow-hidden border border-white/5">
+                        <img src="https://picsum.photos/seed/waterfilter88/800/600.jpg" alt="Proses Pemurnian Air" class="w-full h-[400px] sm:h-[500px] object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-400 via-dark-400/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8">
+                            <div class="flex items-center gap-3 mb-3"><div class="w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center"><i data-lucide="settings" class="w-4 h-4 text-accent"></i></div><span class="text-xs font-semibold uppercase tracking-widest text-accent">Proses Pemurnian</span></div>
+                            <p class="text-sm text-white/60 font-light">Sistem penyaringan bertingkat dengan standar kebersihan terjaga</p>
+                        </div>
+                    </div>
+                    <div class="absolute -top-3 -left-3 w-20 h-20 border-t-2 border-l-2 border-accent/20 rounded-tl-2xl"></div>
+                    <div class="absolute -bottom-3 -right-3 w-20 h-20 border-b-2 border-r-2 border-accent/20 rounded-br-2xl"></div>
+                </div>
+                <div class="space-y-8">
+                    <div class="reveal"><span class="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">Tentang Kami</span><h2 class="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter leading-[1.1] mt-4">Mitra Terpercaya<br>Penyedia <span class="text-accent">Air Murni</span></h2></div>
+                    <div class="reveal reveal-d1 space-y-4">
+                        <p class="text-base font-light text-white/60 leading-relaxed">BM Water merupakan penyedia air murni yang diproses melalui tahapan penyaringan dan pemurnian dengan standar kebersihan yang terjaga. Kami berkomitmen untuk menyediakan air yang higienis, berkualitas, dan konsisten bagi kebutuhan pelanggan.</p>
+                        <p class="text-base font-light text-white/60 leading-relaxed">Berlokasi di Tarogong Kidul, Garut, kami hadir untuk mendukung kegiatan operasional dapur yang membutuhkan air bersih, aman, dan higienis sebagai penyedia air minum yang berkualitas dan terpercaya.</p>
+                    </div>
+                    <div class="reveal reveal-d2 grid grid-cols-2 gap-4">
+                        <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-accent/10 transition-all duration-300"><i data-lucide="map-pin" class="w-5 h-5 text-accent mb-3"></i><div class="text-xs font-medium text-white/80 mb-1">Lokasi</div><div class="text-[11px] text-white/40 leading-relaxed">Pataruman, Tarogong Kidul, Garut</div></div>
+                        <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-accent/10 transition-all duration-300"><i data-lucide="phone" class="w-5 h-5 text-accent mb-3"></i><div class="text-xs font-medium text-white/80 mb-1">Telepon</div><div class="text-[11px] text-white/40">085793715450</div></div>
+                        <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-accent/10 transition-all duration-300"><i data-lucide="droplets" class="w-5 h-5 text-accent mb-3"></i><div class="text-xs font-medium text-white/80 mb-1">Produk</div><div class="text-[11px] text-white/40">Air Murni (Purified Water)</div></div>
+                        <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-accent/10 transition-all duration-300"><i data-lucide="handshake" class="w-5 h-5 text-accent mb-3"></i><div class="text-xs font-medium text-white/80 mb-1">Kerja Sama</div><div class="text-[11px] text-white/40">Berkelanjutan & Saling Menguntungkan</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20"><div class="divider-line h-px"></div></div>
+
+    <!-- ========== QUALITY STANDARDS ========== -->
+    <section id="mutu" class="relative py-24 sm:py-32">
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/3 rounded-full blur-[120px]"></div>
+        <div class="relative max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20">
+            <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
+                <span class="reveal text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">Standar Mutu</span>
+                <h2 class="reveal reveal-d1 text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter leading-[1.1] mt-4">Kualitas Terjamin<br><span class="text-accent">Berstandar Tinggi</span></h2>
+                <p class="reveal reveal-d2 text-base font-light text-white/50 leading-relaxed mt-5">Air BM Water diproduksi dengan mengacu pada standar mutu air minum yang berlaku secara umum di Indonesia</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="reveal group relative p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-accent/15 hover:bg-white/[0.04] transition-all duration-500 card-shadow"><div class="absolute top-0 right-0 w-32 h-32 bg-accent/3 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div><div class="relative"><div class="w-14 h-14 rounded-xl bg-accent/10 border border-accent/15 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="eye" class="w-6 h-6 text-accent"></i></div><h3 class="text-xl font-medium mb-4">Syarat Fisik</h3><ul class="space-y-3"><li class="flex items-center gap-3 text-sm font-light text-white/60"><span class="w-1.5 h-1.5 rounded-full bg-accent/60 flex-shrink-0"></span>Tidak berwarna</li><li class="flex items-center gap-3 text-sm font-light text-white/60"><span class="w-1.5 h-1.5 rounded-full bg-accent/60 flex-shrink-0"></span>Tidak berbau</li><li class="flex items-center gap-3 text-sm font-light text-white/60"><span class="w-1.5 h-1.5 rounded-full bg-accent/60 flex-shrink-0"></span>Tidak berasa</li><li class="flex items-center gap-3 text-sm font-light text-white/60"><span class="w-1.5 h-1.5 rounded-full bg-accent/60 flex-shrink-0"></span>Jernih dan bersih</li></ul></div></div>
+                <div class="reveal reveal-d1 group relative p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-accent/15 hover:bg-white/[0.04] transition-all duration-500 card-shadow"><div class="absolute top-0 right-0 w-32 h-32 bg-accent/3 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div><div class="relative"><div class="w-14 h-14 rounded-xl bg-accent/10 border border-accent/15 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="flask-conical" class="w-6 h-6 text-accent"></i></div><h3 class="text-xl font-medium mb-4">Syarat Kimia</h3><ul class="space-y-3"><li class="flex items-center gap-3 text-sm font-light text-white/60"><span class="w-1.5 h-1.5 rounded-full bg-accent/60 flex-shrink-0"></span>Tidak mengandung zat kimia berbahaya</li><li class="flex items-center gap-3 text-sm font-light text-white/60"><span class="w-1.5 h-1.5 rounded-full bg-accent/60 flex-shrink-0"></span>Bebas logam berat di atas ambang batas</li><li class="flex items-center gap-3 text-sm font-light text-white/60"><span class="w-1.5 h-1.5 rounded-full bg-accent/60 flex-shrink-0"></span>pH air berada pada kisaran aman</li></ul></div></div>
+                <div class="reveal reveal-d2 group relative p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-accent/15 hover:bg-white/[0.04] transition-all duration-500 card-shadow"><div class="absolute top-0 right-0 w-32 h-32 bg-accent/3 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div><div class="relative"><div class="w-14 h-14 rounded-xl bg-accent/10 border border-accent/15 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="microscope" class="w-6 h-6 text-accent"></i></div><h3 class="text-xl font-medium mb-4">Syarat Mikrobiologi</h3><ul class="space-y-3"><li class="flex items-center gap-3 text-sm font-light text-white/60"><span class="w-1.5 h-1.5 rounded-full bg-accent/60 flex-shrink-0"></span>Diproses melalui sistem pemurnian & sterilisasi</li><li class="flex items-center gap-3 text-sm font-light text-white/60"><span class="w-1.5 h-1.5 rounded-full bg-accent/60 flex-shrink-0"></span>Meminimalkan risiko bakteri berbahaya</li><li class="flex items-center gap-3 text-sm font-light text-white/60"><span class="w-1.5 h-1.5 rounded-full bg-accent/60 flex-shrink-0"></span>Bebas mikroorganisme berbahaya</li></ul></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ADVANTAGES SECTION ========== -->
+    <section class="relative py-24 sm:py-32 red-gradient">
+        <div class="relative max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20">
+            <div class="grid lg:grid-cols-12 gap-12 lg:gap-16">
+                <div class="lg:col-span-5 space-y-6">
+                    <span class="reveal text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">Keunggulan</span>
+                    <h2 class="reveal reveal-d1 text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter leading-[1.1]">Mengapa Memilih<br><span class="text-accent">BM Water</span>?</h2>
+                    <p class="reveal reveal-d2 text-base font-light text-white/50 leading-relaxed">Air murni BM Water memiliki berbagai keunggulan yang menjadikannya pilihan tepat untuk kebutuhan dapur dan konsumsi Anda.</p>
+                    <div class="reveal reveal-d3"><a href="https://wa.me/6285793715450?text=Halo%20BM%20Water%2C%20saya%20ingin%20berlangganan%20air%20murni." target="_blank" class="group inline-flex items-center gap-3 px-6 py-3 border border-accent/30 text-accent text-xs font-semibold uppercase tracking-widest rounded-lg hover:bg-accent hover:text-white transition-all duration-300">Mulai Berlangganan <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i></a></div>
+                </div>
+                <div class="lg:col-span-7">
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="reveal group p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/15 transition-all duration-300"><div class="flex items-start gap-4"><div class="w-10 h-10 rounded-lg bg-accent/10 border border-accent/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform"><i data-lucide="sparkles" class="w-5 h-5 text-accent"></i></div><div><h4 class="text-sm font-medium mb-2">Kemurnian Tinggi</h4><p class="text-xs font-light text-white/50 leading-relaxed">Tingkat kemurnian tinggi melalui proses multi-stage filtration</p></div></div></div>
+                        <div class="reveal reveal-d1 group p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/15 transition-all duration-300"><div class="flex items-start gap-4"><div class="w-10 h-10 rounded-lg bg-accent/10 border border-accent/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform"><i data-lucide="chef-hat" class="w-5 h-5 text-accent"></i></div><div><h4 class="text-sm font-medium mb-2">Aman untuk Masak</h4><p class="text-xs font-light text-white/50 leading-relaxed">Aman untuk memasak, minum, dan pengolahan makanan</p></div></div></div>
+                        <div class="reveal reveal-d2 group p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/15 transition-all duration-300"><div class="flex items-start gap-4"><div class="w-10 h-10 rounded-lg bg-accent/10 border border-accent/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform"><i data-lucide="leaf" class="w-5 h-5 text-accent"></i></div><div><h4 class="text-sm font-medium mb-2">Tanpa Pengaruh Rasa</h4><p class="text-xs font-light text-white/50 leading-relaxed">Tidak memengaruhi rasa, warna, maupun aroma masakan</p></div></div></div>
+                        <div class="reveal reveal-d3 group p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/15 transition-all duration-300"><div class="flex items-start gap-4"><div class="w-10 h-10 rounded-lg bg-accent/10 border border-accent/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform"><i data-lucide="shield-check" class="w-5 h-5 text-accent"></i></div><div><h4 class="text-sm font-medium mb-2">Sanitasi Dapur</h4><p class="text-xs font-light text-white/50 leading-relaxed">Mendukung standar kebersihan dan sanitasi dapur optimal</p></div></div></div>
+                        <div class="reveal reveal-d4 group p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/15 transition-all duration-300"><div class="flex items-start gap-4"><div class="w-10 h-10 rounded-lg bg-accent/10 border border-accent/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform"><i data-lucide="activity" class="w-5 h-5 text-accent"></i></div><div><h4 class="text-sm font-medium mb-2">Kualitas Stabil</h4><p class="text-xs font-light text-white/50 leading-relaxed">Kualitas air stabil dan konsisten setiap saat</p></div></div></div>
+                        <div class="reveal reveal-d5 group p-6 rounded-xl bg-white/[0.02] border border-white/5 hover:border-accent/15 transition-all duration-300"><div class="flex items-start gap-4"><div class="w-10 h-10 rounded-lg bg-accent/10 border border-accent/15 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform"><i data-lucide="zap" class="w-5 h-5 text-accent"></i></div><div><h4 class="text-sm font-medium mb-2">Pemakaian Intensif</h4><p class="text-xs font-light text-white/50 leading-relaxed">Cocok untuk kebutuhan dapur pemakaian rutin dan intensif</p></div></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== SERVICE SECTION ========== -->
+    <section id="layanan" class="relative py-24 sm:py-32">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/3 rounded-full blur-[120px]"></div>
+        <div class="relative max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20">
+            <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
+                <span class="reveal text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">Sistem Pelayanan</span>
+                <h2 class="reveal reveal-d1 text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter leading-[1.1] mt-4">Layanan <span class="text-accent">Profesional</span><br>untuk Anda</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="reveal group relative p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-accent/15 transition-all duration-500 overflow-hidden"><div class="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div><div class="relative"><div class="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/15 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="truck" class="w-7 h-7 text-accent"></i></div><h3 class="text-xl font-medium mb-3">Pengiriman</h3><p class="text-sm font-light text-white/50 leading-relaxed">Pengiriman air sesuai kebutuhan pelanggan dengan sistem terjadwal dan tepat waktu.</p><div class="mt-6 pt-6 border-t border-white/5"><div class="flex items-center gap-2 text-accent"><i data-lucide="check-circle-2" class="w-4 h-4"></i><span class="text-xs font-semibold uppercase tracking-widest">Gratis Ongkir</span></div></div></div></div>
+                <div class="reveal reveal-d1 group relative p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-accent/15 transition-all duration-500 overflow-hidden"><div class="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div><div class="relative"><div class="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/15 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="package-check" class="w-7 h-7 text-accent"></i></div><h3 class="text-xl font-medium mb-3">Ketersediaan Pasokan</h3><p class="text-sm font-light text-white/50 leading-relaxed">BM Water siap menyediakan air murni berkelanjutan sesuai permintaan pelanggan.</p><div class="mt-6 pt-6 border-t border-white/5"><div class="flex items-center gap-2 text-accent"><i data-lucide="check-circle-2" class="w-4 h-4"></i><span class="text-xs font-semibold uppercase tracking-widest">Pasokan Terjamin</span></div></div></div></div>
+                <div class="reveal reveal-d2 group relative p-8 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-accent/15 transition-all duration-500 overflow-hidden"><div class="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div><div class="relative"><div class="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/15 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"><i data-lucide="headphones" class="w-7 h-7 text-accent"></i></div><h3 class="text-xl font-medium mb-3">Pelayanan Pelanggan</h3><p class="text-sm font-light text-white/50 leading-relaxed">Pelayanan responsif dan profesional untuk kepuasan pelanggan.</p><div class="mt-6 pt-6 border-t border-white/5"><div class="flex items-center gap-2 text-accent"><i data-lucide="check-circle-2" class="w-4 h-4"></i><span class="text-xs font-semibold uppercase tracking-widest">Respon Cepat</span></div></div></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== PRICING SECTION ========== -->
+    <section id="harga" class="relative py-24 sm:py-32">
+        <div class="absolute top-0 left-0 w-full h-full"><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-accent/4 rounded-full blur-[120px]"></div></div>
+        <div class="relative max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20">
+            <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
+                <span class="reveal text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">Harga & Ketentuan</span>
+                <h2 class="reveal reveal-d1 text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter leading-[1.1] mt-4">Harga <span class="text-accent">Terjangkau</span>,<br>Kualitas Premium</h2>
+            </div>
+            <div class="reveal max-w-lg mx-auto">
+                <div class="relative p-8 sm:p-10 rounded-2xl bg-white/[0.03] border border-accent/15 card-shadow overflow-hidden">
+                    <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-60 h-60 bg-accent/10 rounded-full blur-[80px]"></div>
+                    <div class="relative">
+                        <div class="flex justify-center mb-8"><div class="px-5 py-2 rounded-full bg-accent/10 border border-accent/20"><span class="text-xs font-semibold text-accent uppercase tracking-widest">Penawaran Terbaik</span></div></div>
+                        <div class="text-center mb-8"><div class="text-sm text-white/40 mb-2">Harga Isi Ulang Per Galon</div><div class="flex items-baseline justify-center gap-1"><span class="text-lg font-light text-white/60">Rp</span><span class="text-6xl sm:text-7xl font-light tracking-tighter text-accent">10</span><span class="text-lg font-light text-white/60">.000</span></div></div>
+                        <div class="divider-line h-px mb-8"></div>
+                        <div class="space-y-4 mb-10">
+                            <div class="flex items-center gap-4"><div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0"><i data-lucide="truck" class="w-4 h-4 text-accent"></i></div><div><span class="text-sm font-medium text-white/80">Gratis Pengiriman</span><p class="text-[11px] text-white/40 mt-0.5">Tanpa biaya tambahan</p></div></div>
+                            <div class="flex items-center gap-4"><div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0"><i data-lucide="package" class="w-4 h-4 text-accent"></i></div><div><span class="text-sm font-medium text-white/80">Galon Dipinjamkan</span><p class="text-[11px] text-white/40 mt-0.5">Galon disediakan oleh BM Water</p></div></div>
+                            <div class="flex items-center gap-4"><div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0"><i data-lucide="wallet" class="w-4 h-4 text-accent"></i></div><div><span class="text-sm font-medium text-white/80">Fleksibel Pembayaran</span><p class="text-[11px] text-white/40 mt-0.5">Tunai atau transfer sesuai kesepakatan</p></div></div>
+                            <div class="flex items-center gap-4"><div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0"><i data-lucide="badge-check" class="w-4 h-4 text-accent"></i></div><div><span class="text-sm font-medium text-white/80">Kualitas Terjamin</span><p class="text-[11px] text-white/40 mt-0.5">Berstandar air minum Indonesia</p></div></div>
+                        </div>
+                        <a href="https://wa.me/6285793715450?text=Halo%20BM%20Water%2C%20saya%20ingin%20memesan%20air%20murni%20dengan%20harga%20Rp%2010.000%20per%20galon." target="_blank" class="group flex items-center justify-center gap-3 w-full py-4 bg-accent text-white text-xs font-semibold uppercase tracking-widest rounded-xl hover:bg-accent-dark hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 shadow-lg shadow-accent/20">Pesan Sekarang <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CTA SECTION ========== -->
+    <section class="relative py-24 sm:py-32 overflow-hidden">
+        <div class="absolute inset-0"><img src="https://picsum.photos/seed/waterdroplet99/1920/800.jpg" alt="CTA Background" class="w-full h-full object-cover opacity-10" /><div class="absolute inset-0 bg-gradient-to-t from-dark-400 via-dark-400/95 to-dark-400/80"></div></div>
+        <div class="relative max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20 text-center">
+            <div class="max-w-3xl mx-auto">
+                <div class="reveal inline-flex items-center gap-2 px-4 py-2 rounded-full border border-accent/20 bg-accent/5 mb-8"><i data-lucide="handshake" class="w-3.5 h-3.5 text-accent"></i><span class="text-[10px] font-semibold uppercase tracking-[0.15em] text-accent">Kerja Sama</span></div>
+                <h2 class="reveal reveal-d1 text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter leading-[1.1] mb-6">Siap Menjadi Mitra<br>Penyedia Air <span class="text-accent">Terbaik</span> Anda</h2>
+                <p class="reveal reveal-d2 text-base sm:text-lg font-light text-white/50 leading-relaxed mb-10 max-w-xl mx-auto">Dengan kualitas air murni, standar mutu yang terjaga, harga yang terjangkau, serta layanan gratis pengiriman dan peminjaman galon — BM Water siap bermitra dengan Anda.</p>
+                <div class="reveal reveal-d3 flex flex-wrap justify-center gap-4">
+                    <a href="https://wa.me/6285793715450?text=Halo%20BM%20Water%2C%20saya%20tertarik%20untuk%20kerja%20sama%20penyediaan%20air%20murni." target="_blank" class="group flex items-center gap-3 px-8 py-4 bg-accent text-white text-xs font-semibold uppercase tracking-widest rounded-xl hover:bg-accent-dark hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 shadow-lg shadow-accent/20"><i data-lucide="message-circle" class="w-4 h-4"></i>Hubungi via WhatsApp <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i></a>
+                    <a href="tel:085793715450" class="flex items-center gap-3 px-8 py-4 border border-white/15 text-white/80 text-xs font-semibold uppercase tracking-widest rounded-xl hover:bg-white/5 hover:border-white/25 transition-all duration-300"><i data-lucide="phone" class="w-4 h-4"></i>085793715450</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="relative border-t border-white/5">
+        <div class="max-w-screen-2xl mx-auto px-6 sm:px-8 lg:px-20 py-16 sm:py-20">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+                <div class="lg:col-span-2 space-y-5">
+                    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center"><i data-lucide="droplets" class="w-5 h-5 text-accent"></i></div><span class="text-xl font-semibold tracking-tight font-geist">BM <span class="text-accent">Water</span></span></div>
+                    <p class="text-sm font-light text-white/40 leading-relaxed max-w-md">Penyedia air murni bersih dan higienis yang diproses melalui tahapan penyaringan dan pemurnian dengan standar kebersihan terjaga. Berlokasi di Tarogong Kidul, Garut.</p>
+                    <div class="flex gap-3">
+                        <a href="https://wa.me/6285793715450" target="_blank" class="w-10 h-10 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center hover:bg-accent/10 hover:border-accent/20 transition-all duration-300"><i data-lucide="message-circle" class="w-4 h-4 text-white/50"></i></a>
+                        <a href="tel:085793715450" class="w-10 h-10 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center hover:bg-accent/10 hover:border-accent/20 transition-all duration-300"><i data-lucide="phone" class="w-4 h-4 text-white/50"></i></a>
+                    </div>
+                </div>
+                <div class="space-y-5">
+                    <h4 class="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">Navigasi</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#beranda" class="text-sm text-white/50 hover:text-accent transition-colors duration-300">Beranda</a></li>
+                        <li><a href="#produk" class="text-sm text-white/50 hover:text-accent transition-colors duration-300">Produk</a></li>
+                        <li><a href="#lab" class="text-sm text-white/50 hover:text-accent transition-colors duration-300">Hasil Lab</a></li>
+                        <li><a href="#tentang" class="text-sm text-white/50 hover:text-accent transition-colors duration-300">Tentang Kami</a></li>
+                        <li><a href="#mutu" class="text-sm text-white/50 hover:text-accent transition-colors duration-300">Standar Mutu</a></li>
+                        <li><a href="#harga" class="text-sm text-white/50 hover:text-accent transition-colors duration-300">Harga</a></li>
+                    </ul>
+                </div>
+                <div class="space-y-5">
+                    <h4 class="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">Kontak</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3"><i data-lucide="map-pin" class="w-4 h-4 text-accent/60 mt-0.5 flex-shrink-0"></i><span class="text-xs text-white/50 leading-relaxed">Jl. Pataruman Gg. Sukasari 1 Rt. 03 Rw. 01, Kel. Pataruman, Kec. Tarogong Kidul</span></li>
+                        <li class="flex items-center gap-3"><i data-lucide="phone" class="w-4 h-4 text-accent/60 flex-shrink-0"></i><span class="text-xs text-white/50">085793715450</span></li>
+                        <li class="flex items-center gap-3"><i data-lucide="user" class="w-4 h-4 text-accent/60 flex-shrink-0"></i><span class="text-xs text-white/50">Usman Firdaus</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="divider-line h-px mt-12 mb-8"></div>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-[11px] text-white/30">&copy; 2026 BM Water. Seluruh hak cipta dilindungi.</p>
+                <p class="text-[11px] text-white/30">Penyedia Air Murni Bersih & Higienis — Garut</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========== FLOATING WA ========== -->
+    <a href="https://wa.me/6285793715450?text=Halo%20BM%20Water%2C%20saya%20ingin%20bertanya%20tentang%20layanan%20air%20murni." target="_blank" id="wa-float" class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-accent rounded-full flex items-center justify-center shadow-lg shadow-accent/30 hover:scale-110 hover:shadow-accent/50 transition-all duration-300"><i data-lucide="message-circle" class="w-6 h-6 text-white"></i></a>
+
+    <!-- ========== TOAST ========== -->
+    <div id="toast" class="toast fixed bottom-24 right-6 z-50 px-5 py-3 bg-dark-50 border border-accent/20 rounded-xl backdrop-blur-md max-w-xs"><div class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-accent flex-shrink-0"></i><span id="toast-message" class="text-xs text-white/80"></span></div></div>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script>
+        lucide.createIcons();
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 50) {
+                navbar.classList.add('nav-blur', 'bg-dark-400/80', 'border-b', 'border-white/5');
+            } else {
+                navbar.classList.remove('nav-blur', 'bg-dark-400/80', 'border-b', 'border-white/5');
+            }
+        });
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuPanel = document.getElementById('mobile-menu-panel');
+        let menuOpen = false;
+        mobileMenuBtn.addEventListener('click', () => {
+            menuOpen = !menuOpen;
+            if (menuOpen) {
+                mobileMenu.classList.remove('pointer-events-none', 'opacity-0');
+                mobileMenu.classList.add('pointer-events-auto', 'opacity-100');
+                mobileMenuPanel.classList.remove('translate-x-full');
+                document.body.style.overflow = 'hidden';
+            } else { closeMobileMenu(); }
+        });
+        function closeMobileMenu() {
+            menuOpen = false;
+            mobileMenu.classList.add('pointer-events-none', 'opacity-0');
+            mobileMenu.classList.remove('pointer-events-auto', 'opacity-100');
+            mobileMenuPanel.classList.add('translate-x-full');
+            document.body.style.overflow = '';
+        }
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) { entry.target.classList.add('active'); revealObserver.unobserve(entry.target); }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        revealElements.forEach(el => revealObserver.observe(el));
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => { if (pageYOffset >= s.offsetTop - 200) current = s.getAttribute('id'); });
+            navLinks.forEach(l => {
+                l.classList.remove('text-white', 'bg-white/10');
+                l.classList.add('text-white/60');
+                if (l.getAttribute('href') === '#' + current) { l.classList.add('text-white', 'bg-white/10'); l.classList.remove('text-white/60'); }
+            });
+        });
+        const waFloat = document.getElementById('wa-float');
+        waFloat.style.opacity = '0'; waFloat.style.pointerEvents = 'none'; waFloat.style.transition = 'all 0.3s ease';
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 400) { waFloat.style.opacity = '1'; waFloat.style.pointerEvents = 'auto'; }
+            else { waFloat.style.opacity = '0'; waFloat.style.pointerEvents = 'none'; }
+        });
+    </script>
+</body>
+</html>
